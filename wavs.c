@@ -7,6 +7,26 @@
 	     s[1] << 8  | s[0])
 
 typedef struct {
+  uint16_t channels;
+  uint32_t file_frequency;
+  uint16_t bits_per_sample;
+} SampleDataInfo;
+
+float f(size_t i, float time) {
+  const float frequency = 200.0;
+  
+  float x;
+  if (i % 2 == 0) 
+    x =
+      (sin(2 * M_PI * time * frequency) / 2.0) +
+      (cos(2 * M_PI * time * frequency * 5) / 2.0);
+  else
+    x = sin(2 * M_PI * time * frequency * 10);
+
+  return x;
+}
+
+typedef struct {
   uint32_t tag;
   uint32_t size;
   uint16_t audio_format;
@@ -16,12 +36,6 @@ typedef struct {
   uint16_t byte_per_bloc;
   uint16_t bits_per_sample;
 } Fmt;
-
-typedef struct {
-  uint16_t channels;
-  uint32_t file_frequency;
-  uint16_t bits_per_sample;
-} SampleDataInfo;
 
 Fmt fmt_make(SampleDataInfo* info, uint32_t file_frequency) {
   Fmt r = {0};
@@ -62,20 +76,9 @@ SampleData sample_make(SampleDataInfo* info) {
   r.size = data_size;
   r.data = malloc(data_size);
 
-  const float frequency = 200.0;
-
   for (size_t i = 0; i < data_size; i++) {
     const float time = (float)i / (float)info->file_frequency;
-
-    float x;
-    if (i % 2 == 0) 
-      x =
-	(sin(2 * M_PI * time * frequency) / 2.0) +
-	(cos(2 * M_PI * time * frequency * 5) / 2.0);
-    else
-      x = sin(2 * M_PI * time * frequency * 10);
-    
-    r.data[i] = (uint8_t)(((x + 1.0) / 2.0) * 255);
+    r.data[i] = (uint8_t)(((f(i, time) + 1.0) / 2.0) * 255);
   }
 
   return r;
