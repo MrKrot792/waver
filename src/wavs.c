@@ -12,18 +12,20 @@ typedef struct {
   uint16_t bits_per_sample;
 } SampleDataInfo;
 
-float f(size_t i, float time) {
-  const float frequency = 200.0;
-  
-  float x;
-  if (i % 2 == 0) 
-    x =
-      (sin(2 * M_PI * time * frequency) / 2.0) +
-      (cos(2 * M_PI * time * frequency * 5) / 2.0);
-  else
-    x = sin(2 * M_PI * time * frequency * 10);
+#define MOD_FREQ 50.f
+#define MOD_FADE 0.f
+float modulation(float x) {
+  return 1 / expf(2*M_PI*x*MOD_FADE) * cosf(2*M_PI*x*MOD_FREQ);
+}
 
-  return x;
+#define WAVE_FREQ 150.f
+float wave(float x) {
+  return cosf(2*M_PI*x*WAVE_FREQ);
+}
+
+float f(size_t i, float time) {
+  (void)i;
+  return wave(time) * modulation(time);
 }
 
 typedef struct {
@@ -69,7 +71,7 @@ SampleData sample_make(SampleDataInfo* info) {
   SampleData r = {0};
   r.bloc_id = TAG("data");
 
-  const uint32_t file_time = 4; // seconds
+  const uint32_t file_time = 30; // seconds
   const size_t data_size =
     info->file_frequency * file_time * info->channels;
   
@@ -78,7 +80,9 @@ SampleData sample_make(SampleDataInfo* info) {
 
   for (size_t i = 0; i < data_size; i++) {
     const float time = (float)i / (float)info->file_frequency;
-    r.data[i] = (uint8_t)(((f(i, time) + 1.0) / 2.0) * 255);
+    const float value = (f(i, time) + 1.0) / 2.0;
+  //if (value <= 0.005) value = 0;
+    r.data[i] = (uint8_t)(value * (255));
   }
 
   return r;

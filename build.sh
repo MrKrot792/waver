@@ -1,4 +1,4 @@
 #!/bin/sh
 
 set -xe
-gcc wavs.c -Wall -Wextra -lm -o wavs
+gcc src/wavs.c -Wall -Wextra -lm -o wavs
