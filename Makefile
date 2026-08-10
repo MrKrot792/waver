@@ -34,4 +34,4 @@ etags:
 
 .PHONY: clean
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET)
+	rm -rf $(BUILD_DIR) $(TARGET) $(WAV_TARGET)
