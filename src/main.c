@@ -83,7 +83,7 @@ sample make_note(float duration, note n, uint32_t octave) {
     frequency_by_note(n, octave),
     1.0,
     {0},
-    wave_square,
+    wave_sine,
     (modulation){0.05, 1, 0.05, 0.2},
     last_duration - duration,
     last_duration,
@@ -94,7 +94,7 @@ sample_data sample_make(sample_data_info* info) {
   sample_data r = {0};
   r.bloc_id = TAG("data");
 
-  const uint32_t file_time = 9;
+  const uint32_t file_time = 20;
   const size_t data_size =
     info->file_frequency * file_time * info->channels *
     (info->bits_per_sample / 8);
@@ -102,29 +102,33 @@ sample_data sample_make(sample_data_info* info) {
   r.size = data_size;
   r.data = malloc(data_size);
 
+  float pbm = 104;
+
+  float half_tone_time = 60.0 / pbm;
+
   notes = malloc(128 * sizeof(sample));
 
-  notes[0] = make_note(0.5, NOTE_C, 5);
-  notes[1] = make_note(0.5, NOTE_A, 4);
-  notes[2] = make_note(0.5, NOTE_E, 5);
-  notes[3] = make_note(0.5, NOTE_A, 4);
+  notes[0] = make_note(half_tone_time, NOTE_C, 5);
+  notes[1] = make_note(half_tone_time, NOTE_A, 4);
+  notes[2] = make_note(half_tone_time, NOTE_E, 5);
+  notes[3] = make_note(half_tone_time, NOTE_A, 4);
   
-  notes[4] = make_note(0.5, NOTE_C, 5);
-  notes[5] = make_note(0.5, NOTE_A, 4);
-  notes[6] = make_note(0.5, NOTE_C, 5);
-  notes[7] = make_note(0.25,NOTE_D, 4);
-  notes[8] = make_note(0.25,NOTE_E, 5);
+  notes[4] = make_note(half_tone_time, NOTE_C, 5);
+  notes[5] = make_note(half_tone_time, NOTE_A, 4);
+  notes[6] = make_note(half_tone_time, NOTE_C, 5);
+  notes[7] = make_note(half_tone_time/2.0,NOTE_D, 4);
+  notes[8] = make_note(half_tone_time/2.0,NOTE_E, 5);
 
-  notes[9 ] = make_note(0.5, NOTE_B, 4);
-  notes[10] = make_note(0.5, NOTE_G, 4);
-  notes[11] = make_note(0.5, NOTE_E, 5);
-  notes[12] = make_note(0.5, NOTE_G, 4);
+  notes[9 ] = make_note(half_tone_time, NOTE_B, 4);
+  notes[10] = make_note(half_tone_time, NOTE_G, 4);
+  notes[11] = make_note(half_tone_time, NOTE_E, 5);
+  notes[12] = make_note(half_tone_time, NOTE_G, 4);
   
-  notes[13] = make_note(0.5, NOTE_B, 4);
-  notes[14] = make_note(0.5, NOTE_G, 4);
-  notes[15] = make_note(0.5, NOTE_B, 4);
-  notes[16] = make_note(0.25,NOTE_C, 5);
-  notes[17] = make_note(0.25,NOTE_D, 5);
+  notes[13] = make_note(half_tone_time, NOTE_B, 4);
+  notes[14] = make_note(half_tone_time, NOTE_G, 4);
+  notes[15] = make_note(half_tone_time, NOTE_B, 4);
+  notes[16] = make_note(half_tone_time/2.0,NOTE_C, 5);
+  notes[17] = make_note(half_tone_time/2.0,NOTE_D, 5);
   
   for (size_t i = 0; i < data_size / (info->bits_per_sample / 8); i++) {
     const float time = (float)i / (float)info->file_frequency;
