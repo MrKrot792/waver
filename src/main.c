@@ -14,7 +14,7 @@ typedef struct {
   uint16_t channels;
   uint32_t file_frequency;
   uint16_t bits_per_sample;
-} SampleDataInfo;
+} sample_data_info;
 
 #define FREQ 440
 
@@ -42,10 +42,10 @@ typedef struct {
   uint32_t byte_per_sec;
   uint16_t byte_per_bloc;
   uint16_t bits_per_sample;
-} Fmt;
+} fmt;
 
-Fmt fmt_make(SampleDataInfo* info, uint32_t file_frequency) {
-  Fmt r = {0};
+fmt fmt_make(sample_data_info* info, uint32_t file_frequency) {
+  fmt r = {0};
   r.tag = TAG("fmt ");
   r.size = 0x10;
   r.audio_format = 3; // 1 - int, 3 - float
@@ -62,18 +62,18 @@ Fmt fmt_make(SampleDataInfo* info, uint32_t file_frequency) {
   return r;
 }
 
-void fmt_write(const Fmt* fmt, FILE* fd) {
-  fwrite(fmt, sizeof(Fmt), 1, fd);
+void fmt_write(const fmt* fmt, FILE* fd) {
+  fwrite(fmt, sizeof(fmt), 1, fd);
 }
 
 typedef struct {
   uint32_t bloc_id;
   uint32_t size;
   float* data;
-} SampleData;
+} sample_data;
 
-SampleData sample_make(SampleDataInfo* info) {
-  SampleData r = {0};
+sample_data sample_make(sample_data_info* info) {
+  sample_data r = {0};
   r.bloc_id = TAG("data");
 
   const uint32_t file_time = 42;
@@ -92,8 +92,8 @@ SampleData sample_make(SampleDataInfo* info) {
   return r;
 }
 
-void sample_write(const SampleData* sample, FILE* fd) {
-  fwrite(sample, sizeof(SampleData) - sizeof(float*), 1, fd);
+void sample_write(const sample_data* sample, FILE* fd) {
+  fwrite(sample, sizeof(sample_data) - sizeof(float*), 1, fd);
   fwrite(sample->data, sample->size, 1, fd);
 }
 
@@ -102,16 +102,16 @@ typedef struct {
   uint32_t size;
   uint32_t file_format;
 
-  Fmt fmt;
-  SampleData data;
-} Riff;
+  fmt fmt;
+  sample_data data;
+} riff;
 
-Riff riff_make(uint32_t file_frequency) {
-  Riff r = {0};
+riff riff_make(uint32_t file_frequency) {
+  riff r = {0};
   r.tag = TAG("RIFF");
   r.file_format = TAG("WAVE");
 
-  SampleDataInfo info = {0};
+  sample_data_info info = {0};
   r.fmt  = fmt_make(&info, file_frequency);
   r.data = sample_make(&info);
 
@@ -120,7 +120,7 @@ Riff riff_make(uint32_t file_frequency) {
   return r;
 }
 
-void riff_write(const Riff* riff, FILE* fd) {
+void riff_write(const riff* riff, FILE* fd) {
   fwrite(riff, 4, 3, fd);
   fmt_write(&riff->fmt, fd);
   sample_write(&riff->data, fd);
@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
   }
 
   printf("[WAVS] Generating the soundwave...\n");
-  Riff riff = riff_make(44100);
+  riff riff = riff_make(44100);
   printf("[WAVS] Finished!\n");
 
   printf("[WAVS] Writing the sounds wave to a file...\n");
