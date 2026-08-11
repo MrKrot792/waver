@@ -30,7 +30,7 @@ $(BUILD_DIR):
 
 .PHONY: etags
 etags:
-	etags $(SRC_DIR)/main.c
+	etags $(SRCS)
 
 .PHONY: clean
 clean:
