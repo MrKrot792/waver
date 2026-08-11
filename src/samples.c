@@ -22,11 +22,16 @@ float modulate(float time, float sample_length, modulation mod) {
     return fmax(lerp(1, 0, (time - (mod.attack_time + mod.decay + sustain)) / mod.release), 0);
 }
 
-float sample_at(float time, sample s) {
+// TODO: Potentially move total_length_includes_release to either
+// modulation, or sample.
+float sample_at(float time, sample s, bool total_length_includes_release) {
   float r = s.instrument(time, s.frequency, s.instrument_user_data.data);
   r *= s.amplitude;
-  if (time >= s.start)
-      r *= modulate(time - s.start, s.end - s.start + s.modulation.release, s.modulation);
+  if (time >= s.start) {
+    float release_time =
+      total_length_includes_release ? 0 : s.modulation.release;
+    r *= modulate(time - s.start, s.end - s.start + release_time, s.modulation);
+  }
   else r = 0;
   return r;
 }

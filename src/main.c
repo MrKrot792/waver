@@ -12,7 +12,7 @@ float wave(float x) {
   float r = 0;
 
   for (size_t i = 0; i < 8; i++) {
-    r += sample_at(x, notes[i]);
+    r += sample_at(x, notes[i], true);
   }
 
   return r;
@@ -85,15 +85,19 @@ sample_data sample_make(sample_data_info* info) {
   r.size = data_size;
   r.data = malloc(data_size);
 
+  modulation square_wave_modulation = (modulation){
+    0.05, 1, 0.05, 0.2,
+  };
+
   notes = malloc(8 * sizeof(sample));
   for (size_t i = 0; i < 8; i++) {
     notes[i] = (sample){
       .amplitude = 1.0,
       .instrument_user_data = wave_square_user_data(0.20),
       .instrument = wave_square,
-      .modulation = modulation_basic,
-      .start = (float)i,
-      .end =   (float)i + 1.0,
+      .modulation = square_wave_modulation,
+      .start = (float)i * 0.3,
+      .end =   (float)i * 0.3 + 0.3,
     };
   }
 

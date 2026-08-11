@@ -39,5 +39,5 @@ typedef struct {
   float end;
 } sample;
 
-float sample_at(float time, sample s);
+float sample_at(float time, sample s, bool total_length_includes_release);
 //float sample_at_relative(float time, sample s);
