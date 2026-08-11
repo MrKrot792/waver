@@ -1,3 +1,5 @@
 *.wav
 wavs
 build
+TAGS
+*.wavr
