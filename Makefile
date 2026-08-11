@@ -30,7 +30,7 @@ $(BUILD_DIR):
 
 .PHONY: etags
 etags:
-	etags $(SRCS)
+	etags $(SRCS) include/*
 
 .PHONY: clean
 clean:
