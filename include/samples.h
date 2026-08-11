@@ -28,11 +28,11 @@ static const modulation modulation_basic = (modulation){
 
 float modulate(float time, float sample_length, modulation mod);
 
-// TODO: user data for insrument synthesiser
 // Potentially make a simple structure that contains
 typedef struct {
   float frequency;
   float amplitude;
+  wave_user_data instrument_user_data;
   wave_fn instrument;
   modulation modulation;
   float start;

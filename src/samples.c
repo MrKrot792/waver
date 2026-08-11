@@ -23,7 +23,7 @@ float modulate(float time, float sample_length, modulation mod) {
 }
 
 float sample_at(float time, sample s) {
-  float r = s.instrument(time, s.frequency, NULL);
+  float r = s.instrument(time, s.frequency, s.instrument_user_data.data);
   r *= s.amplitude;
   if (time >= s.start)
       r *= modulate(time - s.start, s.end - s.start + s.modulation.release, s.modulation);

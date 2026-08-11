@@ -6,92 +6,15 @@
 #include "wave.h"
 #include "samples.h"
 
-#define FREQ 440
+sample* notes = NULL;
 
 float wave(float x) {
   float r = 0;
 
-  sample a_sample = (sample){
-    .frequency = frequency_by_note(NOTE_A, 4),
-    .amplitude = 1.0,
-    .instrument = wave_sine,
-    .modulation = modulation_basic,
-    .start = 0.0,
-    .end = 1.0,
-  };
+  for (size_t i = 0; i < 8; i++) {
+    r += sample_at(x, notes[i]);
+  }
 
-  sample b_sample = (sample){
-    .frequency = frequency_by_note(NOTE_B, 4),
-    .amplitude = 1.0,
-    .instrument = wave_sine,
-    .modulation = modulation_basic,
-    .start = 1.0,
-    .end = 2.0,
-  };
-
-  sample c_sample = (sample){
-    .frequency = frequency_by_note(NOTE_C, 4),
-    .amplitude = 1.0,
-    .instrument = wave_sine,
-    .modulation = modulation_basic,
-    .start = 2.0,
-    .end = 3.0,
-  };
-
-  sample d_sample = (sample){
-    .frequency = frequency_by_note(NOTE_D, 4),
-    .amplitude = 1.0,
-    .instrument = wave_sine,
-    .modulation = modulation_basic,
-    .start = 3.0,
-    .end = 4.0,
-  };
-
-  sample e_sample = (sample){
-    .frequency = frequency_by_note(NOTE_E, 4),
-    .amplitude = 1.0,
-    .instrument = wave_sine,
-    .modulation = modulation_basic,
-    .start = 4.0,
-    .end = 5.0,
-  };
-
-  sample f_sample = (sample){
-    .frequency = frequency_by_note(NOTE_F, 4),
-    .amplitude = 1.0,
-    .instrument = wave_sine,
-    .modulation = modulation_basic,
-    .start = 5.0,
-    .end = 6.0,
-  };
-
-  sample g_sample = (sample){
-    .frequency = frequency_by_note(NOTE_G, 4),
-    .amplitude = 1.0,
-    .instrument = wave_sine,
-    .modulation = modulation_basic,
-    .start = 6.0,
-    .end = 7.0,
-  };
-
-  sample aa_sample = (sample){
-    .frequency = frequency_by_note(NOTE_A, 5),
-    .amplitude = 1.0,
-    .instrument = wave_sine,
-    .modulation = modulation_basic,
-    .start = 7.0,
-    .end = 8.0,
-  };
-
-  r += sample_at(x, a_sample);
-  r += sample_at(x, b_sample);
-  r += sample_at(x, c_sample);
-  r += sample_at(x, d_sample);
-  r += sample_at(x, e_sample);
-  r += sample_at(x, f_sample);
-  r += sample_at(x, g_sample);
-  r += sample_at(x, aa_sample);
-  
   return r;
 }
 
@@ -162,6 +85,27 @@ sample_data sample_make(sample_data_info* info) {
   r.size = data_size;
   r.data = malloc(data_size);
 
+  notes = malloc(8 * sizeof(sample));
+  for (size_t i = 0; i < 8; i++) {
+    notes[i] = (sample){
+      .amplitude = 1.0,
+      .instrument_user_data = wave_square_user_data(0.20),
+      .instrument = wave_square,
+      .modulation = modulation_basic,
+      .start = (float)i,
+      .end =   (float)i + 1.0,
+    };
+  }
+
+  notes[0].frequency = frequency_by_note(NOTE_A, 4);
+  notes[1].frequency = frequency_by_note(NOTE_B, 4);
+  notes[2].frequency = frequency_by_note(NOTE_C, 4);
+  notes[3].frequency = frequency_by_note(NOTE_D, 4);
+  notes[4].frequency = frequency_by_note(NOTE_E, 4);
+  notes[5].frequency = frequency_by_note(NOTE_F, 4);
+  notes[6].frequency = frequency_by_note(NOTE_G, 4);
+  notes[7].frequency = frequency_by_note(NOTE_A, 5);
+  
   for (size_t i = 0; i < data_size / (info->bits_per_sample / 8); i++) {
     const float time = (float)i / (float)info->file_frequency;
     r.data[i] = f(i, time);
