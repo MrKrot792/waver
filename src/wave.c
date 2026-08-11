@@ -4,7 +4,6 @@
 #include "wave.h"
 
 float wave_square(float x, float w, void* d) {
-  w /= 2*M_PI;
   float phase = x * w;
   phase -= (int)phase;
   float duty = d == NULL ? 0.5 : *(float*)d;
@@ -13,5 +12,5 @@ float wave_square(float x, float w, void* d) {
 
 float wave_sine(float x, float w, void* d) {
   (void)d;
-  return sin(x * w);
+  return sin(2 * M_PI * x * w);
 }

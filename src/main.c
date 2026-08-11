@@ -12,7 +12,7 @@ float wave(float x) {
   float r = 0;
 
   sample a_sample = (sample){
-    .frequency = 2 * M_PI * frequency_by_note(NOTE_A, 4),
+    .frequency = frequency_by_note(NOTE_A, 4),
     .amplitude = 1.0,
     .instrument = wave_sine,
     .modulation = modulation_basic,
@@ -21,7 +21,7 @@ float wave(float x) {
   };
 
   sample b_sample = (sample){
-    .frequency = 2 * M_PI * frequency_by_note(NOTE_B, 4),
+    .frequency = frequency_by_note(NOTE_B, 4),
     .amplitude = 1.0,
     .instrument = wave_sine,
     .modulation = modulation_basic,
@@ -30,7 +30,7 @@ float wave(float x) {
   };
 
   sample c_sample = (sample){
-    .frequency = 2 * M_PI * frequency_by_note(NOTE_C, 4),
+    .frequency = frequency_by_note(NOTE_C, 4),
     .amplitude = 1.0,
     .instrument = wave_sine,
     .modulation = modulation_basic,
@@ -39,7 +39,7 @@ float wave(float x) {
   };
 
   sample d_sample = (sample){
-    .frequency = 2 * M_PI * frequency_by_note(NOTE_D, 4),
+    .frequency = frequency_by_note(NOTE_D, 4),
     .amplitude = 1.0,
     .instrument = wave_sine,
     .modulation = modulation_basic,
@@ -48,7 +48,7 @@ float wave(float x) {
   };
 
   sample e_sample = (sample){
-    .frequency = 2 * M_PI * frequency_by_note(NOTE_E, 4),
+    .frequency = frequency_by_note(NOTE_E, 4),
     .amplitude = 1.0,
     .instrument = wave_sine,
     .modulation = modulation_basic,
@@ -57,7 +57,7 @@ float wave(float x) {
   };
 
   sample f_sample = (sample){
-    .frequency = 2 * M_PI * frequency_by_note(NOTE_F, 4),
+    .frequency = frequency_by_note(NOTE_F, 4),
     .amplitude = 1.0,
     .instrument = wave_sine,
     .modulation = modulation_basic,
@@ -66,7 +66,7 @@ float wave(float x) {
   };
 
   sample g_sample = (sample){
-    .frequency = 2 * M_PI * frequency_by_note(NOTE_G, 4),
+    .frequency = frequency_by_note(NOTE_G, 4),
     .amplitude = 1.0,
     .instrument = wave_sine,
     .modulation = modulation_basic,
@@ -75,7 +75,7 @@ float wave(float x) {
   };
 
   sample aa_sample = (sample){
-    .frequency = 2 * M_PI * frequency_by_note(NOTE_A, 5),
+    .frequency = frequency_by_note(NOTE_A, 5),
     .amplitude = 1.0,
     .instrument = wave_sine,
     .modulation = modulation_basic,
