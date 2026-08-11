@@ -4,7 +4,102 @@
 #include <ctype.h>
 
 #include "wave.h"
-#include "notes.h"
+#include "samples.h"
+
+#define FREQ 440
+
+float wave(float x) {
+  float r = 0;
+
+  sample a_sample = (sample){
+    .frequency = 2 * M_PI * frequency_by_note(NOTE_A, 4),
+    .amplitude = 1.0,
+    .instrument = wave_sine,
+    .modulation = modulation_basic,
+    .start = 0.0,
+    .end = 1.0,
+  };
+
+  sample b_sample = (sample){
+    .frequency = 2 * M_PI * frequency_by_note(NOTE_B, 4),
+    .amplitude = 1.0,
+    .instrument = wave_sine,
+    .modulation = modulation_basic,
+    .start = 1.0,
+    .end = 2.0,
+  };
+
+  sample c_sample = (sample){
+    .frequency = 2 * M_PI * frequency_by_note(NOTE_C, 4),
+    .amplitude = 1.0,
+    .instrument = wave_sine,
+    .modulation = modulation_basic,
+    .start = 2.0,
+    .end = 3.0,
+  };
+
+  sample d_sample = (sample){
+    .frequency = 2 * M_PI * frequency_by_note(NOTE_D, 4),
+    .amplitude = 1.0,
+    .instrument = wave_sine,
+    .modulation = modulation_basic,
+    .start = 3.0,
+    .end = 4.0,
+  };
+
+  sample e_sample = (sample){
+    .frequency = 2 * M_PI * frequency_by_note(NOTE_E, 4),
+    .amplitude = 1.0,
+    .instrument = wave_sine,
+    .modulation = modulation_basic,
+    .start = 4.0,
+    .end = 5.0,
+  };
+
+  sample f_sample = (sample){
+    .frequency = 2 * M_PI * frequency_by_note(NOTE_F, 4),
+    .amplitude = 1.0,
+    .instrument = wave_sine,
+    .modulation = modulation_basic,
+    .start = 5.0,
+    .end = 6.0,
+  };
+
+  sample g_sample = (sample){
+    .frequency = 2 * M_PI * frequency_by_note(NOTE_G, 4),
+    .amplitude = 1.0,
+    .instrument = wave_sine,
+    .modulation = modulation_basic,
+    .start = 6.0,
+    .end = 7.0,
+  };
+
+  sample aa_sample = (sample){
+    .frequency = 2 * M_PI * frequency_by_note(NOTE_A, 5),
+    .amplitude = 1.0,
+    .instrument = wave_sine,
+    .modulation = modulation_basic,
+    .start = 7.0,
+    .end = 8.0,
+  };
+
+  r += sample_at(x, a_sample);
+  r += sample_at(x, b_sample);
+  r += sample_at(x, c_sample);
+  r += sample_at(x, d_sample);
+  r += sample_at(x, e_sample);
+  r += sample_at(x, f_sample);
+  r += sample_at(x, g_sample);
+  r += sample_at(x, aa_sample);
+  
+  return r;
+}
+
+float f(size_t i, float time) {
+  (void)i;
+  float w = wave(time);
+  return w;
+}
 
 #define TAG(s)					\
   (uint32_t)(s[3] << 24 | s[2] << 16 |		\
@@ -15,23 +110,6 @@ typedef struct {
   uint32_t file_frequency;
   uint16_t bits_per_sample;
 } sample_data_info;
-
-#define FREQ 440
-
-float wave(float x) {
-  float r = 0;
-  float w = 2 * M_PI * 440;
-
-  r = wave_sine(x, w, NULL);
-  
-  return r;
-}
-
-float f(size_t i, float time) {
-  (void)i;
-  float w = wave(time);
-  return w;
-}
 
 typedef struct {
   uint32_t tag;
@@ -62,8 +140,8 @@ fmt fmt_make(sample_data_info* info, uint32_t file_frequency) {
   return r;
 }
 
-void fmt_write(const fmt* fmt, FILE* fd) {
-  fwrite(fmt, sizeof(fmt), 1, fd);
+void fmt_write(const fmt* format, FILE* fd) {
+  fwrite(format, sizeof(fmt), 1, fd);
 }
 
 typedef struct {
@@ -76,7 +154,7 @@ sample_data sample_make(sample_data_info* info) {
   sample_data r = {0};
   r.bloc_id = TAG("data");
 
-  const uint32_t file_time = 42;
+  const uint32_t file_time = 9;
   const size_t data_size =
     info->file_frequency * file_time * info->channels *
     (info->bits_per_sample / 8);
@@ -102,7 +180,7 @@ typedef struct {
   uint32_t size;
   uint32_t file_format;
 
-  fmt fmt;
+  fmt format;
   sample_data data;
 } riff;
 
@@ -112,17 +190,17 @@ riff riff_make(uint32_t file_frequency) {
   r.file_format = TAG("WAVE");
 
   sample_data_info info = {0};
-  r.fmt  = fmt_make(&info, file_frequency);
+  r.format  = fmt_make(&info, file_frequency);
   r.data = sample_make(&info);
 
-  r.size = r.fmt.size + r.data.size;
+  r.size = r.format.size + r.data.size;
 
   return r;
 }
 
 void riff_write(const riff* riff, FILE* fd) {
   fwrite(riff, 4, 3, fd);
-  fmt_write(&riff->fmt, fd);
+  fmt_write(&riff->format, fd);
   sample_write(&riff->data, fd);
 }
 

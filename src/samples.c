@@ -1,0 +1,34 @@
+#include <math.h>
+
+#include "samples.h"
+
+static inline float lerp(float a, float b, float t) {
+  return a + t * (b - a);
+}
+
+float frequency_by_note(note n, uint32_t octave) {
+  return 27.5f * powf(2.0f, (float)octave + (float)n / 12.0f);
+}
+
+float modulate(float time, float sample_length, modulation mod) {
+  float sustain = sample_length - (mod.attack_time + mod.decay + mod.release);
+  if (time <= mod.attack_time)
+    return fmax(lerp(0, mod.attack_amplitude, time / mod.attack_time), 0);
+  else if (time <= mod.attack_time + mod.decay)
+    return lerp(mod.attack_amplitude, 1, (time - mod.attack_time) / mod.decay);
+  else if (time <= mod.attack_time + mod.decay + sustain)
+    return 1;
+  else
+    return fmax(lerp(1, 0, (time - (mod.attack_time + mod.decay + sustain)) / mod.release), 0);
+}
+
+float sample_at(float time, sample s) {
+  float r = s.instrument(time, s.frequency, NULL);
+  r *= s.amplitude;
+  if (time >= s.start)
+      r *= modulate(time - s.start, s.end - s.start + s.modulation.release, s.modulation);
+  else r = 0;
+  return r;
+}
+
+//float sample_at_relative(float time, sample s);
