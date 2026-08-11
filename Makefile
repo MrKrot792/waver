@@ -1,6 +1,6 @@
 BUILD_DIR := build
 SRC_DIR   := src
-TARGET    := wavs
+TARGET    := waver
 CC        := gcc
 CFLAGS    := -g -O0 -Wall -Wextra -Iinclude -Ithirdparty
 LFLAGS    := -lm
