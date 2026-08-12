@@ -14,7 +14,7 @@ typedef struct {
 } complete_sample;
 
 complete_sample* notes = NULL;
-uint32_t max_note = 1;
+uint32_t max_note = 0;
 
 float wave(float x) {
   float r = 0;
@@ -128,7 +128,6 @@ sample_data sample_make(sample_data_info* info) {
     10,
   };
   
-  /*
   note_append(make_note(half_tone_time, NOTE_C, 5));
   note_append(make_note(half_tone_time, NOTE_A, 4));
   note_append(make_note(half_tone_time, NOTE_E, 5));
@@ -171,7 +170,6 @@ sample_data sample_make(sample_data_info* info) {
   note_append(make_note(half_tone_time, NOTE_F, 4));
   note_append(make_note(half_tone_time, NOTE_E, 4));
   note_append(make_note(half_tone_time, NOTE_D, 4));
-  */
 
   set_sample_rate(info->file_frequency);
   
