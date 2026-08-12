@@ -28,16 +28,24 @@ static const modulation modulation_basic = (modulation){
 
 float modulate(float time, float sample_length, modulation mod);
 
-// Potentially make a simple structure that contains
+void set_sample_rate(uint32_t s);
+
+// TODO: Allocation of sample + freeing and referencing counting.
+// TODO: Potentially custom modulators (and rename them to envelopes).
 typedef struct {
   float frequency;
-  float amplitude;
+  float amplitude; // TODO: Potentially move this to the modulator
   wave_user_data instrument_user_data;
   wave_fn instrument;
   modulation modulation;
-  float start;
-  float end;
+  float length; // Total length in seconds.
 } sample;
 
-float sample_at(float time, sample s, bool total_length_includes_release);
+typedef struct {
+  float phase; // From 0 to 1. Loops.
+  uint32_t periods_passed; // Increments each time phase loops.
+} sample_state;
+
+// TODO: Global state sample rate
+float sample_next(sample s, sample_state* state, bool total_length_includes_release);
 //float sample_at_relative(float time, sample s);
