@@ -7,7 +7,7 @@
 #include "samples.h"
 
 sample* notes = NULL;
-uint32_t max_note = 0;
+uint32_t max_note = 1;
 
 float wave(float x) {
   float r = 0;
@@ -83,11 +83,17 @@ sample make_note(float duration, note n, uint32_t octave) {
     frequency_by_note(n, octave),
     1.0,
     {0},
-    wave_sine,
+    wave_triangle,
     (modulation){0.05, 1, 0.05, 0.2},
     last_duration - duration,
     last_duration,
   };
+}
+
+void note_append(sample s) {
+  static uint32_t last = 0;
+  notes[last] = s;
+  last++;
 }
 
 sample_data sample_make(sample_data_info* info) {
@@ -108,31 +114,58 @@ sample_data sample_make(sample_data_info* info) {
 
   notes = malloc(128 * sizeof(sample));
 
-  notes[0] = make_note(half_tone_time, NOTE_C, 5);
-  notes[1] = make_note(half_tone_time, NOTE_A, 4);
-  notes[2] = make_note(half_tone_time, NOTE_E, 5);
-  notes[3] = make_note(half_tone_time, NOTE_A, 4);
+  notes[0] = (sample){
+    15000, 1, {0}, wave_triangle, modulation_basic, 0, 10
+  };
   
-  notes[4] = make_note(half_tone_time, NOTE_C, 5);
-  notes[5] = make_note(half_tone_time, NOTE_A, 4);
-  notes[6] = make_note(half_tone_time, NOTE_C, 5);
-  notes[7] = make_note(half_tone_time/2.0,NOTE_D, 4);
-  notes[8] = make_note(half_tone_time/2.0,NOTE_E, 5);
+  /*
+  note_append(make_note(half_tone_time, NOTE_C, 5));
+  note_append(make_note(half_tone_time, NOTE_A, 4));
+  note_append(make_note(half_tone_time, NOTE_E, 5));
+  note_append(make_note(half_tone_time, NOTE_A, 4));
+  
+  note_append(make_note(half_tone_time, NOTE_C, 5));
+  note_append(make_note(half_tone_time, NOTE_A, 4));
+  note_append(make_note(half_tone_time, NOTE_C, 5));
+  note_append(make_note(half_tone_time/2.0,NOTE_D, 4));
+  note_append(make_note(half_tone_time/2.0,NOTE_E, 5));
 
-  notes[9 ] = make_note(half_tone_time, NOTE_B, 4);
-  notes[10] = make_note(half_tone_time, NOTE_G, 4);
-  notes[11] = make_note(half_tone_time, NOTE_E, 5);
-  notes[12] = make_note(half_tone_time, NOTE_G, 4);
-  
-  notes[13] = make_note(half_tone_time, NOTE_B, 4);
-  notes[14] = make_note(half_tone_time, NOTE_G, 4);
-  notes[15] = make_note(half_tone_time, NOTE_B, 4);
-  notes[16] = make_note(half_tone_time/2.0,NOTE_C, 5);
-  notes[17] = make_note(half_tone_time/2.0,NOTE_D, 5);
+  note_append(make_note(half_tone_time, NOTE_B, 4));
+  note_append(make_note(half_tone_time, NOTE_G, 4));
+  note_append(make_note(half_tone_time, NOTE_E, 5));
+  note_append(make_note(half_tone_time, NOTE_G, 4));
+
+  note_append(make_note(half_tone_time, NOTE_B, 4));
+  note_append(make_note(half_tone_time, NOTE_G, 4));
+  note_append(make_note(half_tone_time, NOTE_B, 4));
+  note_append(make_note(half_tone_time/2.0,NOTE_C, 5));
+  note_append(make_note(half_tone_time/2.0,NOTE_D, 5));
+
+  note_append(make_note(half_tone_time, NOTE_A, 4));
+  note_append(make_note(half_tone_time, NOTE_F, 4));
+  note_append(make_note(half_tone_time, NOTE_C, 5));
+  note_append(make_note(half_tone_time, NOTE_F, 4));
+
+  note_append(make_note(half_tone_time, NOTE_A, 4));
+  note_append(make_note(half_tone_time, NOTE_F, 4));
+  note_append(make_note(half_tone_time, NOTE_A, 4));
+  note_append(make_note(half_tone_time/2.0, NOTE_B, 4));
+  note_append(make_note(half_tone_time/2.0, NOTE_C, 5));
+
+  note_append(make_note(half_tone_time, NOTE_B, 4));
+  note_append(make_note(half_tone_time, NOTE_GIS, 4));
+  note_append(make_note(half_tone_time, NOTE_E, 4));
+  note_append(make_note(half_tone_time, NOTE_G, 4));
+
+  note_append(make_note(half_tone_time, NOTE_D, 4));
+  note_append(make_note(half_tone_time, NOTE_F, 4));
+  note_append(make_note(half_tone_time, NOTE_E, 4));
+  note_append(make_note(half_tone_time, NOTE_D, 4));
+  */
   
   for (size_t i = 0; i < data_size / (info->bits_per_sample / 8); i++) {
     const float time = (float)i / (float)info->file_frequency;
-    r.data[i] = f(i, time);
+    r.data[i] = (float)f(i, time);
   }
 
   return r;

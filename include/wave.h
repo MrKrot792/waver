@@ -27,10 +27,40 @@ typedef struct {
   wave_user_data_deinit_fn deinit_fn;
 } wave_user_data;
 
-/// user_data must be a pointer to float, or NULL.
+/// User data must be a pointer to a float, or NULL.
 /// If it's a float, then it indicates the duty cycle of the wave. If
 /// it's NULL, then the duty cycle is assumed to be 50%.
 float wave_square(float x, float w, void* d);
 wave_user_data wave_square_user_data(float duty_cycle);
-/// user_data is not used.
+/// User data is not used.
 float wave_sine (float x, float w, void* d);
+/// User data must be a pointer to a float, or NULL.
+/// If it's a float, then it indicates the displacement of the
+/// triangle wave's peak. I. e. if it's -1.0, then the triangle wave
+/// converts into a sawtooth wave. If it's +1.0 instead, it's also a
+/// sawtooth wave, but the other way around.
+///
+/// i.e, -1:
+/// 
+///    |\    |\
+///    | \   | \
+/// \--|--\--|--\
+///  \ |   \ |
+///   \|    \|
+///
+/// 0:
+///
+///        /\
+///       /  \
+/// \----/----\----/
+///  \  /      \  /
+///   \/        \/
+///
+/// and +1:
+///   /|    /|
+///  / |   / |
+/// /--|--/--|--/
+///    | /   | /
+///    |/    |/
+float wave_triangle(float x, float w, void* d);
+wave_user_data wave_triangle_user_data(float shape);
