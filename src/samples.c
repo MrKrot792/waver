@@ -6,7 +6,7 @@ static inline float lerp(float a, float b, float t) {
   return a + t * (b - a);
 }
 
-static uint32_t sample_rate;
+static uint32_t sample_rate = 0;
 
 void set_sample_rate(uint32_t s) {
   sample_rate = s;
@@ -30,31 +30,19 @@ float modulate(float time, float sample_length, modulation mod) {
 
 // TODO: Potentially move total_length_includes_release to either
 // modulation, or sample.
-float sample_at(float time, sample s, bool total_length_includes_release) {
-  float r = s.instrument(time, s.frequency, s.instrument_user_data.data);
-  r *= s.amplitude;
-  if (time >= s.start) {
-    float release_time =
-      total_length_includes_release ? 0 : s.modulation.release;
-    r *= modulate(time - s.start, s.end - s.start + release_time, s.modulation);
-  }
-  else r = 0;
-  return r;
-}
-
 float sample_next(sample s, sample_state* state, bool total_length_includes_release) {
   float r = s.instrument(state->phase, s.instrument_user_data.data);
   r *= s.amplitude;
   float release_time =
     total_length_includes_release ? 0 : s.modulation.release;
-  r *= modulate(((float)state->periods_passed + state->phase) / sample_rate,
-		s.length + release_time, s.modulation);
+  r *= modulate(((float)state->periods_passed + state->phase) / s.frequency,
+		s.duration + release_time, s.modulation);
 
   state->phase += s.frequency / sample_rate;
   if (state->phase >= 1.0f) {
     float int_part = floorf(state->phase);
     state->phase -= int_part;
-    state->perids_passed += int_part;
+    state->periods_passed += int_part;
   }
   
   return r;

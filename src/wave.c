@@ -9,39 +9,35 @@
   *d = p;					\
   return (wave_user_data){ d, true, free };	\
 
-float wave_square(float x, float w, void* d) {
-  float phase = x * w;
-  phase -= (int)phase;
+float wave_square(float p, void* d) {
   float duty = d == NULL ? 0.5 : *(float*)d;
-  return phase < duty ? 1.0f : -1.0f;
+  return p < duty ? 1.0f : -1.0f;
 }
 
 wave_user_data wave_square_user_data(float duty_cycle) {
   WAVE_USER_DATA_FLOAT(duty_cycle)
 }
 
-float wave_sine(float x, float w, void* d) {
+float wave_sine(float p, void* d) {
   (void)d;
-  return sin(2 * M_PI * x * w);
+  return sin(2 * M_PI * p);
 }
 
 // TODO: Optimize
-float wave_triangle(float x, float w, void* d) {
-  float T = 1.0 / w;
-  float D = d == NULL ? 0.5 : (*(float*)d + 1.0) / 2.0;
-  float tau = fmod(x, T);
+float wave_triangle(float p, void* d) {
+  float data = d ? *(float*)d : 0.0f;
+  float D = (data + 1.0f) * 0.5f;
 
-  if (tau < 0.0)
-    tau += T;
+  if (D <= 0.0f)
+    return 1.0f - 2.0f * p;
 
-  float y;
+  if (D >= 1.0f)
+    return 2.0f * p - 1.0f;
 
-  if (tau < D * T)
-    y = tau / (D * T);
-  else
-    y = (T - tau) / ((1.0 - D) * T);
+  if (p < D)
+    return -1.0f + 2.0f * p / D;
 
-  return y * 2.0 - 1.0;
+  return 1.0f - 2.0f * (p - D) / (1.0f - D);
 }
 
 wave_user_data wave_triangle_user_data(float shape) {

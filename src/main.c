@@ -6,14 +6,23 @@
 #include "wave.h"
 #include "samples.h"
 
-sample* notes = NULL;
+typedef struct {
+  sample s;
+  sample_state st;
+  float start;
+  float end;
+} complete_sample;
+
+complete_sample* notes = NULL;
 uint32_t max_note = 1;
 
 float wave(float x) {
   float r = 0;
 
   for (size_t i = 0; i < max_note; i++) {
-    r += sample_at(x, notes[i], true);
+    if (x < notes[i].start) continue;
+    if (x > notes[i].end)   continue;
+    r += sample_next(notes[i].s, &notes[i].st, true);
   }
 
   return r;
@@ -74,25 +83,23 @@ typedef struct {
   float* data;
 } sample_data;
 
-float last_duration = 0;
-
 sample make_note(float duration, note n, uint32_t octave) {
   max_note++;
-  last_duration += duration;
   return (sample){
     frequency_by_note(n, octave),
     1.0,
     {0},
     wave_triangle,
     (modulation){0.05, 1, 0.05, 0.2},
-    last_duration - duration,
-    last_duration,
+    duration,
   };
 }
 
 void note_append(sample s) {
   static uint32_t last = 0;
-  notes[last] = s;
+  static float last_time = 0;
+  notes[last] = (complete_sample){s, {0}, last_time, last_time + s.duration};
+  last_time += s.duration;
   last++;
 }
 
@@ -112,10 +119,13 @@ sample_data sample_make(sample_data_info* info) {
 
   float half_tone_time = 60.0 / pbm;
 
-  notes = malloc(128 * sizeof(sample));
+  notes = malloc(128 * sizeof(complete_sample));
 
-  notes[0] = (sample){
-    15000, 1, {0}, wave_triangle, modulation_basic, 0, 10
+  notes[0] = (complete_sample){
+    (sample){220, 1, {0}, wave_triangle, modulation_basic, 10.0},
+    (sample_state){0},
+    0,
+    10,
   };
   
   /*
@@ -162,6 +172,8 @@ sample_data sample_make(sample_data_info* info) {
   note_append(make_note(half_tone_time, NOTE_E, 4));
   note_append(make_note(half_tone_time, NOTE_D, 4));
   */
+
+  set_sample_rate(info->file_frequency);
   
   for (size_t i = 0; i < data_size / (info->bits_per_sample / 8); i++) {
     const float time = (float)i / (float)info->file_frequency;
@@ -191,8 +203,8 @@ riff riff_make(uint32_t file_frequency) {
   r.file_format = TAG("WAVE");
 
   sample_data_info info = {0};
-  r.format  = fmt_make(&info, file_frequency);
-  r.data = sample_make(&info);
+  r.format = fmt_make(&info, file_frequency);
+  r.data   = sample_make(&info);
 
   r.size = r.format.size + r.data.size;
 

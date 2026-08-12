@@ -38,7 +38,7 @@ typedef struct {
   wave_user_data instrument_user_data;
   wave_fn instrument;
   modulation modulation;
-  float length; // Total length in seconds.
+  float duration; // Total length in seconds.
 } sample;
 
 typedef struct {
