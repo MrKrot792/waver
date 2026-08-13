@@ -7,14 +7,14 @@
 #define WAVE_USER_DATA_FLOAT(p)			\
   float* d = malloc(sizeof(float));		\
   *d = p;					\
-  return (wave_user_data){ d, true, free };	\
+  return (wave_user_data_t){ d, true, free };	\
 
 float wave_square(float p, void* d) {
   float duty = d == NULL ? 0.5 : *(float*)d;
   return p < duty ? 1.0f : -1.0f;
 }
 
-wave_user_data wave_square_user_data(float duty_cycle) {
+wave_user_data_t wave_square_user_data(float duty_cycle) {
   WAVE_USER_DATA_FLOAT(duty_cycle)
 }
 
@@ -40,6 +40,6 @@ float wave_triangle(float p, void* d) {
   return 1.0f - 2.0f * (p - D) / (1.0f - D);
 }
 
-wave_user_data wave_triangle_user_data(float shape) {
+wave_user_data_t wave_triangle_user_data(float shape) {
   WAVE_USER_DATA_FLOAT(shape)
 }

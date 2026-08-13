@@ -24,13 +24,13 @@ typedef struct {
   void* data;
   bool deinit_fn_present;
   wave_user_data_deinit_fn deinit_fn;
-} wave_user_data;
+} wave_user_data_t;
 
 /// User data must be a pointer to a float, or NULL.
 /// If it's a float, then it indicates the duty cycle of the wave. If
 /// it's NULL, then the duty cycle is assumed to be 50%.
 float wave_square(float p, void* d);
-wave_user_data wave_square_user_data(float duty_cycle);
+wave_user_data_t wave_square_user_data(float duty_cycle);
 /// User data is not used.
 float wave_sine (float p, void* d);
 /// User data must be a pointer to a float, or NULL.
@@ -62,4 +62,4 @@ float wave_sine (float p, void* d);
 ///    | /   | /
 ///    |/    |/
 float wave_triangle(float p, void* d);
-wave_user_data wave_triangle_user_data(float shape);
+wave_user_data_t wave_triangle_user_data(float shape);

@@ -12,11 +12,11 @@ void set_sample_rate(uint32_t s) {
   sample_rate = s;
 }
 
-float frequency_by_note(note n, uint32_t octave) {
+float frequency_by_note(note_t n, uint32_t octave) {
   return 27.5f * powf(2.0f, (float)octave + (float)n / 12.0f);
 }
 
-float modulate(float time, float sample_length, modulation mod) {
+float modulate(float time, float sample_length, modulation_t mod) {
   float sustain = sample_length - (mod.attack_time + mod.decay + mod.release);
   if (time <= mod.attack_time)
     return fmax(lerp(0, mod.attack_amplitude, time / mod.attack_time), 0);
@@ -30,7 +30,7 @@ float modulate(float time, float sample_length, modulation mod) {
 
 // TODO: Potentially move total_length_includes_release to either
 // modulation, or sample.
-float sample_next(sample s, sample_state* state, bool total_length_includes_release) {
+float sample_next(sample_t s, sample_state_t* state, bool total_length_includes_release) {
   float r = s.instrument(state->phase, s.instrument_user_data.data);
   r *= s.amplitude;
   float release_time =
