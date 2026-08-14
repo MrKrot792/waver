@@ -2,7 +2,14 @@
 #if FEATURE_TUI
 
 #define TB_IMPL
-#include "termbox2.h"
+#if defined(__clang__) && defined(__GNUC__)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wunused-function"
+#  include "termbox2.h"
+#  pragma GCC diagnostic pop
+#else
+#  include "termbox2.h"
+#endif
 #include "interface.h"
 
 void tui_init() {
@@ -10,6 +17,9 @@ void tui_init() {
 }
 
 void tui_loop(complete_sample_t* samples, uint32_t sample_count) {
+  (void)samples;
+  (void)sample_count;
+  
   tb_printf(0, 0, 0, 0, "Hello, world!");
   tb_present();
   struct tb_event event = {0};
