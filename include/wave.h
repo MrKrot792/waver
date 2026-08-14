@@ -21,9 +21,8 @@ typedef void (*wave_user_data_deinit_fn)(void* data);
 // TODO: Potentially add reference counting.
 /// It is safe to null initialize this struct.
 typedef struct {
-  void* data;
-  bool deinit_fn_present;
   wave_user_data_deinit_fn deinit_fn;
+  void* data;
 } wave_user_data_t;
 
 /// User data must be a pointer to a float, or NULL.

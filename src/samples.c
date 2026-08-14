@@ -17,15 +17,15 @@ float frequency_by_note(note_t n, uint32_t octave) {
 }
 
 float modulate(float time, float sample_length, modulation_t mod) {
-  float sustain = sample_length - (mod.attack_time + mod.decay + mod.release);
+  float sustain = sample_length - (mod.attack + mod.decay + mod.release);
   if (time <= mod.attack_time)
-    return fmax(lerp(0, mod.attack_amplitude, time / mod.attack_time), 0);
-  else if (time <= mod.attack_time + mod.decay)
-    return lerp(mod.attack_amplitude, 1, (time - mod.attack_time) / mod.decay);
-  else if (time <= mod.attack_time + mod.decay + sustain)
+    return fmax(lerp(0, 1, time / mod.attack), 0);
+  else if (time <= mod.attack + mod.decay)
+    return lerp(1, mod.sustain, (time - mod.attack) / mod.decay);
+  else if (time <= mod.attack + mod.decay + sustain_time)
     return 1;
   else
-    return fmax(lerp(1, 0, (time - (mod.attack_time + mod.decay + sustain)) / mod.release), 0);
+    return fmax(lerp(1, 0, (time - (mod.attack + mod.decay + sustain_time)) / mod.release), 0);
 }
 
 // TODO: Potentially move total_length_includes_release to either
@@ -48,4 +48,7 @@ float sample_next(sample_t s, sample_state_t* state, bool total_length_includes_
   return r;
 }
 
-//float sample_at_relative(float time, sample s);
+void sample_free(sample_t s) {
+  if (s.instrument_user_data.deinit_fn != NULL)
+    s.instrument_user_data.deinit_fn(s.instrument_user_data.data);
+}

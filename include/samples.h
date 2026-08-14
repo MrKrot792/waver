@@ -11,11 +11,11 @@ typedef enum {
 
 float frequency_by_note(note_t n, uint32_t octave);
 
-// Subject to change.
+// Standard ASDR. Nothing to explain.
 typedef struct {
-  float attack_time;      // total attack time
-  float attack_amplitude; // relative; 1.5 means total_amplitude * 1.5
-  float decay;            // total decay time, etc
+  float attack;
+  float sustain;
+  float decay;
   float release;
 } modulation_t;
 
@@ -32,6 +32,8 @@ void set_sample_rate(uint32_t s);
 
 // TODO: Allocation of sample + freeing and referencing counting.
 // TODO: Potentially custom modulators (and rename them to envelopes).
+// TODO: Pluggable functions for frequencies, and maybe something
+// else. And let amplitude be managed by the modulator.
 typedef struct {
   float frequency;
   float amplitude; // TODO: Potentially move this to the modulator
@@ -42,7 +44,7 @@ typedef struct {
 } sample_t;
 
 typedef struct {
-  float phase; // From 0 to 1. Loops.
+  float phase;             // From 0 to 1. Loops.
   uint32_t periods_passed; // Increments each time phase loops.
 } sample_state_t;
 
@@ -55,6 +57,5 @@ typedef struct {
   float end;
 } complete_sample_t;
 
-// TODO: Global state sample rate
 float sample_next(sample_t s, sample_state_t* state, bool total_length_includes_release);
-//float sample_at_relative(float time, sample s);
+void sample_free(sample_t s);
