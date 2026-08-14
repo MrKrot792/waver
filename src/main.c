@@ -295,6 +295,7 @@ int main(int argc, char* argv[]) {
     tui_loop(NULL, 0);
     tui_deinit();
 #else
+    fprintf(stderr, "%s: ERROR: Compiled without FEATURE_TUI.\n", args.exe_name);
 #endif
     
   } else {
