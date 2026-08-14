@@ -7,7 +7,7 @@
 #define WAVE_USER_DATA_FLOAT(p)			\
   float* d = malloc(sizeof(float));		\
   *d = p;					\
-  return (wave_user_data_t){ d, true, free };	\
+  return (wave_user_data_t){ free, d };		\
 
 float wave_square(float p, void* d) {
   float duty = d == NULL ? 0.5 : *(float*)d;
