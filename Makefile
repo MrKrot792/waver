@@ -2,10 +2,10 @@ BUILD_DIR := build
 SRC_DIR   := src
 TARGET    := waver
 CC        := gcc
-CFLAGS    := -g -O0 -Wall -Wextra -Iinclude -Ithirdparty
+CFLAGS    := -g -O0 -Wall -Wextra -Iinclude -I. -Ithirdparty
 LFLAGS    := -lm
 
-SRCS := src/main.c src/samples.c src/wave.c
+SRCS := src/main.c src/samples.c src/wave.c src/interface.c
 OBJS := $(SRCS:src/%.c=build/%.o)
 
 WAV_TARGET := file.wav
@@ -30,7 +30,7 @@ $(BUILD_DIR):
 
 .PHONY: etags
 etags:
-	etags $(SRCS) include/*
+	etags $(SRCS) include/* thirdparty/*
 
 .PHONY: clean
 clean:

@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <getopt.h>
 
+#include "config.h"
+#include "interface.h"
 #include "wave.h"
 #include "samples.h"
 
@@ -290,7 +292,7 @@ int main(int argc, char* argv[]) {
   if (args.tui_mode) {
 #if FEATURE_TUI == 1
     tui_init();
-    tui_loop();
+    tui_loop(NULL, 0);
     tui_deinit();
 #else
 #endif
