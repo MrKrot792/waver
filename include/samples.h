@@ -20,10 +20,10 @@ typedef struct {
 } modulation_t;
 
 static const modulation_t modulation_basic = (modulation_t){
-  .attack_time = 0.1f,
-  .attack_amplitude = 1.2f,
-  .decay = 0.1f,
-  .release = 0.25f,
+  .attack  = 0.02f,
+  .decay   = 0.1f,
+  .sustain = 0.7f,
+  .release = 0.10f,
 };
 
 float modulate(float time, float sample_length, modulation_t mod);
