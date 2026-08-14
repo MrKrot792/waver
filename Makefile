@@ -17,7 +17,7 @@ all: $(TARGET)
 wav: $(WAV_TARGET)
 
 $(WAV_TARGET): $(TARGET)
-	./$(TARGET) $(WAV_TARGET)
+	./$(TARGET) -o $(WAV_TARGET)
 
 $(TARGET): $(OBJS)
 	$(CC) $(OBJS) $(LFLAGS) -o $@
