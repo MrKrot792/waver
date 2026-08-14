@@ -46,6 +46,15 @@ typedef struct {
   uint32_t periods_passed; // Increments each time phase loops.
 } sample_state_t;
 
+// TODO: Integrate this into the sample_next function.
+// Or think of another solution, as this looks out of place for now.
+typedef struct {
+  sample_t s;
+  sample_state_t st;
+  float start;
+  float end;
+} complete_sample_t;
+
 // TODO: Global state sample rate
 float sample_next(sample_t s, sample_state_t* state, bool total_length_includes_release);
 //float sample_at_relative(float time, sample s);

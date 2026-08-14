@@ -2,18 +2,11 @@
 #include <stdlib.h>
 #include <math.h>
 #include <ctype.h>
+#include <unistd.h>
+#include <getopt.h>
 
 #include "wave.h"
 #include "samples.h"
-
-// TODO: Remove this, as this is a temporary structure meant for
-// testing.
-typedef struct {
-  sample_t s;
-  sample_state_t st;
-  float start;
-  float end;
-} complete_sample_t;
 
 complete_sample_t* notes = NULL;
 uint32_t max_note = 0;
@@ -217,19 +210,102 @@ void riff_write(const riff_t* riff, FILE* fd) {
   sample_write(&riff->data, fd);
 }
 
-int main(int argc, char* argv[]) {
-  if (argc <2) {
-    fprintf(stderr, "Not enough arguments\n");
-    return -1;
+typedef struct {
+  const char* exe_name;
+  const char* output_file_path;
+  bool tui_mode;
+  bool print_usage;
+  bool verbose;
+} arguments_t;
+
+arguments_t parse_arguments(int argc, char* argv[]) {
+  arguments_t args = {0};
+  args.exe_name = argv[0];
+
+  static struct option long_options[] = {
+    {"help",    0, 0, 'h'},
+    {"output",  1, 0, 'o'},
+    {"tui",     0, 0, 't'},
+    {"verbose", 0, 0, 'v'},
+    {0,         0, 0,  0 }
+  };
+
+  for (;;) {
+    int option_index;
+    int c = getopt_long(argc, argv, "ho:tv",
+			long_options, &option_index);
+    if (c == -1) break;
+    
+    switch (c) {
+    case 'h':
+      args.print_usage = true;
+      break;
+
+    case 't':
+      args.tui_mode = true;
+      break;
+
+    case 'o':
+      args.output_file_path = optarg;
+      break;
+
+    case 'v':
+      args.verbose = true;
+      break;
+
+    case '?':
+      fprintf(stderr, "Try '%s --help' for more information.\n", argv[0]);
+      exit(-1);
+      break;
+
+    default:
+      fprintf(stderr, "Something went wrong, code 0%x\n", c);
+      break;
+    }
   }
 
-  printf("[WAVS] Generating the soundwave...\n");
-  riff_t riff = riff_make(44100);
-  printf("[WAVS] Finished!\n");
+  if (args.output_file_path == NULL)
+    args.output_file_path = "a.out";
 
-  printf("[WAVS] Writing the sounds wave to a file...\n");
-  FILE* fd = fopen(argv[1], "w");
-  riff_write(&riff, fd);
-  fclose(fd);
-  printf("[WAVS] Finished!\n");
+  return args;
+}
+
+void print_usage(const char* exe_name, int (*print_fn)(const char *format, ...)) {
+  print_fn("%s: [OPTIONS] -o FILE\n", exe_name);
+  print_fn("OPTIONS:\n");
+  print_fn("  -o --output [OUTPUT]  Specify the output file.\n"); 
+  print_fn("  -h --help             Prints this help message.\n");
+  print_fn("  -t --tui              Enable TUI mode. Must be compiled with FEATURE_TUI.\n");
+  print_fn("  -v --verbose          Enables verbose logging.\n");
+}
+
+int main(int argc, char* argv[]) {
+  arguments_t args = parse_arguments(argc, argv);
+
+  if (args.print_usage) {
+    print_usage(args.exe_name, printf);
+    return 0;
+  }
+
+  if (args.tui_mode) {
+#if FEATURE_TUI == 1
+    tui_init();
+    tui_loop();
+    tui_deinit();
+#else
+#endif
+    
+  } else {
+    printf("Exporting...\n");
+    if (args.verbose) printf("[WAVS] Generating the soundwave...\n");
+    riff_t riff = riff_make(44100);
+    if (args.verbose) printf("[WAVS] Finished!\n");
+
+    if (args.verbose) printf("[WAVS] Writing the sounds wave to a file %s...\n",
+			     args.output_file_path);
+    FILE* fd = fopen(args.output_file_path, "w");
+    riff_write(&riff, fd);
+    fclose(fd);
+    if (args.verbose) printf("[WAVS] Finished!\n");
+  }
 }
