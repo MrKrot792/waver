@@ -5,7 +5,7 @@ CC        := gcc
 CFLAGS    := -g -O0 -Wall -Wextra -Iinclude -I. -Ithirdparty
 LFLAGS    := -lm
 
-SRCS := src/main.c src/samples.c src/wave.c src/interface.c
+SRCS := src/main.c src/samples.c src/wave.c src/interface.c src/backends/static.c
 OBJS := $(SRCS:src/%.c=build/%.o)
 
 WAV_TARGET := file.wav
@@ -27,10 +27,11 @@ build/%.o: src/%.c | $(BUILD_DIR)
 
 $(BUILD_DIR):
 	mkdir -p $@
+	mkdir -p $(BUILD_DIR)/backends # TODO: This is awkward to use.
 
 .PHONY: etags
 etags:
-	etags $(SRCS) include/* thirdparty/*
+	bash -c "shopt -s globstar; etags ./**/*.c ./**/*.h"
 
 .PHONY: clean
 clean:

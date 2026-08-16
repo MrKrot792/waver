@@ -10,13 +10,18 @@
 #include "wave.h"
 #include "samples.h"
 
+#include "backends/static.h"
+
+static complete_sample_t* result_samples = NULL;
+static uint32_t result_samples_count = 0;
+
 float wave(float x) {
   float r = 0;
 
-  for (size_t i = 0; i < max_note; i++) {
-    if (x < notes[i].start) continue;
-    if (x > notes[i].end)   continue;
-    r += sample_next(notes[i].s, &notes[i].st, true);
+  for (size_t i = 0; i < result_samples_count; i++) {
+    if (x < result_samples[i].start) continue;
+    if (x > result_samples[i].end)   continue;
+    r += sample_next(result_samples[i].s, &result_samples[i].st, true);
   }
 
   return r;
@@ -90,6 +95,10 @@ sample_data_t sample_make(sample_data_info_t* info) {
   r.data = malloc(data_size);
   
   set_sample_rate(info->file_frequency);
+
+  backend_static_generate(&result_samples,
+			  &result_samples_count,
+			  (backend_user_data_t){0});
   
   for (size_t i = 0; i < data_size / (info->bits_per_sample / 8); i++) {
     const float time = (float)i / (float)info->file_frequency;
