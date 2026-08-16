@@ -29,14 +29,13 @@ static void note_append(sample_t s) {
 }
 
 void backend_static_generate(
-   complete_sample_t** samples,
-   uint32_t* count,
+   backend_data_t* data,
    backend_user_data_t user_data
 ) {
   (void)user_data;
-  *samples = malloc(128 * sizeof(complete_sample_t));
-  notes = *samples;
-  max_note = count;
+  data->samples = malloc(128 * sizeof(complete_sample_t));
+  notes = data->samples;
+  max_note = &data->count;
 
   float pbm = 104;
   float half_tone_time = 60.0 / pbm;

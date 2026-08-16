@@ -7,7 +7,6 @@
 #include "samples.h"
 
 void backend_static_generate(
- complete_sample_t** samples,
- uint32_t* count,
+ backend_data_t* data,
  backend_user_data_t user_data
 );
