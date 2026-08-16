@@ -11,11 +11,11 @@ typedef enum {
 
 float frequency_by_note(note_t n, uint32_t octave);
 
-// Standard ASDR. Nothing to explain.
+// Standard ADSR. Nothing to explain.
 typedef struct {
   float attack;
-  float sustain;
   float decay;
+  float sustain;
   float release;
 } modulation_t;
 

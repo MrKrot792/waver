@@ -17,15 +17,18 @@ float frequency_by_note(note_t n, uint32_t octave) {
 }
 
 float modulate(float time, float sample_length, modulation_t mod) {
-  float sustain = sample_length - (mod.attack + mod.decay + mod.release);
+  float sustain_len = sample_length - (mod.attack + mod.decay + mod.release);
+  float r;
   if (time <= mod.attack)
-    return fmax(lerp(0, 1, time / mod.attack), 0);
+    r = lerp(0, 1, time / mod.attack);
   else if (time <= mod.attack + mod.decay)
-    return lerp(1, mod.sustain, (time - mod.attack) / mod.decay);
-  else if (time <= mod.attack + mod.decay + sustain)
-    return 1;
+    r = lerp(1, mod.sustain, (time - mod.attack) / mod.decay);
+  else if (time <= mod.attack + mod.decay + sustain_len)
+    r = mod.sustain;
   else
-    return fmax(lerp(1, 0, (time - (mod.attack + mod.decay + sustain)) / mod.release), 0);
+    r = lerp(mod.sustain, 0, (time - (mod.attack + mod.decay + sustain_len)) / mod.release);
+  
+  return fmin(1, fmax(0, r));
 }
 
 // TODO: Potentially move total_length_includes_release to either
