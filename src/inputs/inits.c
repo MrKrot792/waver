@@ -41,3 +41,13 @@ void input_init_mixer(input_t* input,
     .data = p,
   };
 }
+
+void input_init_pointer(input_t* input, float* pointer) {
+  float** p = malloc(sizeof(void*));
+  *p = pointer;
+  *input = (input_t){
+    .kind = INPUT_KIND_POINTER,
+    .references = 1,
+    .data = p,
+  };
+}

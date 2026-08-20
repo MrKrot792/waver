@@ -26,13 +26,17 @@ static float mixer_get(const void* input) {
          input_get(i->i2) * input_get(i->i2_volume);
 }
 
+static float pointer_get(const void* input) {
+  return **(float**)input;
+}
+
 static const input_fn input_kind_to_fn[] = {
-  static_get, lfo_get, mixer_get,
+  static_get, lfo_get, mixer_get, pointer_get
 };
 
 typedef void (*input_deinit_fn)(void* data);
 
-static void static_deinit(void* d) { free(d); }
+static void simple_deinit(void* d) { free(d); }
 static void lfo_deinit(void* d) {
   oscillator_deinit((oscillator_t*)d);
   free(d);
@@ -48,7 +52,7 @@ static void mixer_deinit(void* d) {
 }
 
 static const input_deinit_fn input_kind_to_deinit[] = {
-  static_deinit, lfo_deinit, mixer_deinit,
+  simple_deinit, lfo_deinit, mixer_deinit, simple_deinit
 };
 
 typedef void (*input_tick_fn)(void* data);
@@ -68,7 +72,7 @@ static void mixer_tick(void* d) {
 }
 
 static const input_tick_fn input_kind_to_tick[] = {
-  no_tick, lfo_tick, mixer_tick
+  no_tick, lfo_tick, mixer_tick, no_tick
 };
 
 void input_tick(input_t* input) {

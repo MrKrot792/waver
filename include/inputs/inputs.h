@@ -8,6 +8,7 @@ typedef enum {
   INPUT_KIND_STATIC,
   INPUT_KIND_LFO,
   INPUT_KIND_MIXER,
+  INPUT_KIND_POINTER,
 } input_kind_t;
 
 typedef struct {

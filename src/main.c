@@ -85,7 +85,7 @@ sample_data_t sample_make(sample_data_info_t* info) {
   sample_data_t r = {0};
   r.bloc_id = TAG("data");
 
-  const uint32_t file_time = 5;
+  const uint32_t file_time = 20;
   const size_t data_size =
     info->file_frequency * file_time * info->channels *
     (info->bits_per_sample / 8);
@@ -102,40 +102,43 @@ sample_data_t sample_make(sample_data_info_t* info) {
   input_t one;
   input_init_static(&one, 1.f);
   
-  input_t freq;
-  input_init_static(&freq, 440.f);
+  input_t dc;
+  input_init_static(&dc, 880.f);
 
-  input_t freq2;
-  input_init_static(&freq2, 110.f);
+  float timep = 1.f;
+  
+  input_t freq;
+  input_init_pointer(&freq, &timep);
 
   input_t ampl;
-  input_init_static(&ampl, 220.f);
+  input_init_static(&ampl, 440.f);
 
   input_t frequency;
   input_init_lfo(&frequency, (oscillator_t){
-    &freq2,
+    &freq,
     &ampl,
-    (wave_t) {wave_sine, {0}, {0}},
+    (wave_t) {wave_triangle, wave_triangle_user_data(1), {0}},
   });
   
   input_t f;
   input_init_mixer(&f,
 		   &frequency, input_clone(&one),
-		   &freq, input_clone(&one));
+		   &dc, input_clone(&one));
   
   input_t i;
   input_init_lfo(&i, (oscillator_t){
     &f,
     &one,
     (wave_t){
-      .function = wave_sine,
+      .function = wave_square,
       .user_data = {0},
       .state = {0},
     },
   });
   
   for (size_t n = 0; n < data_size / (info->bits_per_sample / 8); n++) {
-    // const float time = (float)n / (float)info->file_frequency;
+    const float time = (float)n / (float)info->file_frequency;
+    timep = 60;
     r.data[n] = 0.5 * input_get(&i);
     input_tick(&i);
   }
