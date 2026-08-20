@@ -17,13 +17,24 @@ typedef float (*wave_fn)(float phase, void* user_data);
 
 typedef void (*wave_user_data_deinit_fn)(void* data);
 
-// TODO: Rename everything to `type_t`
 // TODO: Potentially add reference counting.
 /// It is safe to null initialize this struct.
 typedef struct {
   wave_user_data_deinit_fn deinit_fn;
   void* data;
 } wave_user_data_t;
+
+typedef struct {
+  float phase;             // From 0 to 1. Loops.
+  uint32_t periods_passed; // Increments each time phase loops.
+} wave_state_t;
+
+// TODO: Maybe separate state from info
+typedef struct {
+  wave_fn function;
+  wave_user_data_t user_data;
+  wave_state_t state;
+} wave_t;
 
 /// User data must be a pointer to a float, or NULL.
 /// If it's a float, then it indicates the duty cycle of the wave. If

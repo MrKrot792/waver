@@ -35,18 +35,13 @@ void set_sample_rate(uint32_t s);
 // TODO: Pluggable functions for frequencies, and maybe something
 // else. And let amplitude be managed by the modulator.
 typedef struct {
-  float frequency;
+  float frequency; // Only useful with dynamic functions, as it's relative.
   float amplitude; // TODO: Potentially move this to the modulator
-  wave_user_data_t instrument_user_data;
-  wave_fn instrument;
+  wave_fn wave;
+  wave_user_data_t wave_user_data;
   modulation_t modulation;
   float duration; // Total length in seconds.
 } sample_t;
-
-typedef struct {
-  float phase;             // From 0 to 1. Loops.
-  uint32_t periods_passed; // Increments each time phase loops.
-} sample_state_t;
 
 // TODO: Integrate this into the sample_next function.
 // Or think of another solution, as this looks out of place for now.
