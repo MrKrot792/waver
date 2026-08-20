@@ -1,15 +1,40 @@
 #pragma once // TODO: get rid of this thing
 #include <stdint.h>
 
+#include "inputs/inputs.h"
 #include "wave.h"
 
 typedef enum {
   NOTE_A,   NOTE_AIS, NOTE_B,   NOTE_C,
   NOTE_CIS, NOTE_D,   NOTE_DIS, NOTE_E,
   NOTE_F,   NOTE_FIS, NOTE_G,   NOTE_GIS 
-} note_t;
+} frequency_note_t;
 
-float frequency_by_note(note_t n, uint32_t octave);
+typedef enum {
+  FREQUENCY_KIND_NOTE,
+  FREQUENCY_KIND_RAW,
+} frequency_kind_t;
+
+typedef struct {
+  frequency_kind_t kind;
+  union {
+    struct {
+      frequency_note_t note;
+      uint32_t octave;
+    } note;
+    float raw;
+  } data;
+} frequency_t;
+
+float frequency_get(frequency_t f);
+
+typedef struct {
+  frequency_t frequency;
+  float       amplitude;
+  input_t*    instrument;
+  float       start;
+  float       duration;
+} sample_t;
 
 // Standard ADSR. Nothing to explain.
 typedef struct {
@@ -27,30 +52,3 @@ static const modulation_t modulation_basic = (modulation_t){
 };
 
 float modulate(float time, float sample_length, modulation_t mod);
-
-void set_sample_rate(uint32_t s);
-
-// TODO: Allocation of sample + freeing and referencing counting.
-// TODO: Potentially custom modulators (and rename them to envelopes).
-// TODO: Pluggable functions for frequencies, and maybe something
-// else. And let amplitude be managed by the modulator.
-typedef struct {
-  float frequency; // Only useful with dynamic functions, as it's relative.
-  float amplitude; // TODO: Potentially move this to the modulator
-  wave_fn wave;
-  wave_user_data_t wave_user_data;
-  modulation_t modulation;
-  float duration; // Total length in seconds.
-} sample_t;
-
-// TODO: Integrate this into the sample_next function.
-// Or think of another solution, as this looks out of place for now.
-typedef struct {
-  sample_t s;
-  sample_state_t st;
-  float start;
-  float end;
-} complete_sample_t;
-
-float sample_next(sample_t s, sample_state_t* state, bool total_length_includes_release);
-void sample_free(sample_t s);

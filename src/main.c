@@ -10,28 +10,27 @@
 #include "wave.h"
 #include "samples.h"
 
+#include "inputs/inputs.h"
+#include "inputs/inits.h"
+
 #include "backends/static.h"
 
-static complete_sample_t* result_samples = NULL;
-static uint32_t result_samples_count = 0;
+// float wave(float x) {
+//   float r = 0;
 
-float wave(float x) {
-  float r = 0;
+//   for (size_t i = 0; i < result_samples_count; i++) {
+//     if (x < result_samples[i].start) continue;
+//     if (x > result_samples[i].end)   continue;
+//   }
 
-  for (size_t i = 0; i < result_samples_count; i++) {
-    if (x < result_samples[i].start) continue;
-    if (x > result_samples[i].end)   continue;
-    r += sample_next(result_samples[i].s, &result_samples[i].st, true);
-  }
+//   return r;
+// }
 
-  return r;
-}
-
-float f(size_t i, float time) {
-  (void)i;
-  float w = wave(time);
-  return w;
-}
+// float f(size_t i, float time) {
+//   (void)i;
+//   float w = wave(time);
+//   return w;
+// }
 
 #define TAG(s)					\
   (uint32_t)(s[3] << 24 | s[2] << 16 |		\
@@ -86,7 +85,7 @@ sample_data_t sample_make(sample_data_info_t* info) {
   sample_data_t r = {0};
   r.bloc_id = TAG("data");
 
-  const uint32_t file_time = 20;
+  const uint32_t file_time = 5;
   const size_t data_size =
     info->file_frequency * file_time * info->channels *
     (info->bits_per_sample / 8);
@@ -94,16 +93,54 @@ sample_data_t sample_make(sample_data_info_t* info) {
   r.size = data_size;
   r.data = malloc(data_size);
   
-  set_sample_rate(info->file_frequency);
+  wave_set_sample_rate(info->file_frequency);
 
-  backend_static_generate(&result_samples,
-			  &result_samples_count,
-			  (backend_user_data_t){0});
+  // backend_static_generate(&result_samples,
+  // 			  &result_samples_count,
+  // 			  (backend_user_data_t){0})
+
+  input_t one;
+  input_init_static(&one, 1.f);
   
-  for (size_t i = 0; i < data_size / (info->bits_per_sample / 8); i++) {
-    const float time = (float)i / (float)info->file_frequency;
-    r.data[i] = (float)f(i, time);
+  input_t freq;
+  input_init_static(&freq, 440.f);
+
+  input_t freq2;
+  input_init_static(&freq2, 110.f);
+
+  input_t ampl;
+  input_init_static(&ampl, 220.f);
+
+  input_t frequency;
+  input_init_lfo(&frequency, (oscillator_t){
+    &freq2,
+    &ampl,
+    (wave_t) {wave_sine, {0}, {0}},
+  });
+  
+  input_t f;
+  input_init_mixer(&f,
+		   &frequency, input_clone(&one),
+		   &freq, input_clone(&one));
+  
+  input_t i;
+  input_init_lfo(&i, (oscillator_t){
+    &f,
+    &one,
+    (wave_t){
+      .function = wave_sine,
+      .user_data = {0},
+      .state = {0},
+    },
+  });
+  
+  for (size_t n = 0; n < data_size / (info->bits_per_sample / 8); n++) {
+    // const float time = (float)n / (float)info->file_frequency;
+    r.data[n] = 0.5 * input_get(&i);
+    input_tick(&i);
   }
+  
+  input_deinit(&i);
 
   return r;
 }
@@ -234,8 +271,9 @@ int main(int argc, char* argv[]) {
     riff_t riff = riff_make(44100);
     if (args.verbose) printf("[WAVS] Finished!\n");
 
-    if (args.verbose) printf("[WAVS] Writing the sounds wave to a file %s...\n",
-			     args.output_file_path);
+    if (args.verbose)
+      printf("[WAVS] Writing the sounds wave to a file %s...\n",
+	     args.output_file_path);
     FILE* fd = fopen(args.output_file_path, "w");
     riff_write(&riff, fd);
     fclose(fd);

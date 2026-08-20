@@ -16,7 +16,7 @@ void tui_init() {
   tb_init();
 }
 
-void tui_loop(complete_sample_t* samples, uint32_t sample_count) {
+void tui_loop(sample_t* samples, uint32_t sample_count) {
   (void)samples;
   (void)sample_count;
   

@@ -5,7 +5,7 @@ CC        := gcc
 CFLAGS    := -g -O0 -Wall -Wextra -Iinclude -I. -Ithirdparty
 LFLAGS    := -lm
 
-SRCS := src/main.c src/samples.c src/wave.c src/interface.c src/backends/static.c src/backends/backends.c
+SRCS := src/main.c src/samples.c src/wave.c src/interface.c src/oscillator.c src/inputs/inputs.c src/inputs/inits.c src/backends/backends.c
 OBJS := $(SRCS:src/%.c=build/%.o)
 
 WAV_TARGET := file.wav
@@ -17,7 +17,7 @@ all: $(TARGET)
 wav: $(WAV_TARGET)
 
 $(WAV_TARGET): $(TARGET)
-	./$(TARGET) -o $(WAV_TARGET)
+	./$(TARGET) -v -o $(WAV_TARGET)
 
 $(TARGET): $(OBJS)
 	$(CC) $(OBJS) $(LFLAGS) -o $@
@@ -28,6 +28,7 @@ build/%.o: src/%.c | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir -p $@
 	mkdir -p $(BUILD_DIR)/backends # TODO: This is awkward to use.
+	mkdir -p $(BUILD_DIR)/inputs
 
 .PHONY: etags
 etags:

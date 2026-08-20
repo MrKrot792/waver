@@ -1,7 +1,7 @@
 #pragma once
-
-#include "inputs.h"
+ 
 #include "wave.h"
+#include "inputs/inputs.h"
 
 typedef struct {
   input_t* frequency;
@@ -9,5 +9,6 @@ typedef struct {
   wave_t   wave;
 } oscillator_t;
 
-float oscillator_get(oscillator_t* osc, float frequency);
-void oscillator_deinit(oscillator_t* osc);
+float oscillator_get(const oscillator_t* osc);
+void  oscillator_tick(oscillator_t* osc);
+void  oscillator_deinit(oscillator_t* osc);
