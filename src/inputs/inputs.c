@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <assert.h>
 
 #include "inputs/inputs.h"
 #include "inputs/inits.h"
@@ -66,8 +67,12 @@ static const input_tick_fn input_kind_to_tick[] = {
 };
 
 void input_tick(input_t* input) {
-  if (i->kind == INPUT_KIND_STATIC) return;
-  input_kind_to_tick[input->kind](input->data);
+  input->tick_number++;
+  if (input->tick_number == input->references) {
+    input->tick_number = 0;
+    if (input->kind == INPUT_KIND_STATIC) return;
+    input_kind_to_tick[input->kind](input->data);
+  }
 }
 
 float input_get(const input_t* input) {
@@ -76,9 +81,10 @@ float input_get(const input_t* input) {
 }
 
 void input_deinit(input_t* input) {
+  assert(input > 0);
   input->references--;
-  if (i->kind == INPUT_KIND_STATIC) return;
   if (input->references == 0) {
+    if (input->kind == INPUT_KIND_STATIC) return;
     input_kind_to_deinit[input->kind](input->data);
   }
 }

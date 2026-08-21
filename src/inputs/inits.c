@@ -8,7 +8,6 @@ void input_init_static(input_t* input, float value) {
     .kind = INPUT_KIND_STATIC,
     .references = 1,
     .static_number = value,
-    .data = NULL,
   };
 }
 

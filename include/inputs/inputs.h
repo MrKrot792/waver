@@ -15,6 +15,9 @@ typedef enum {
 typedef struct {
   input_kind_t kind;
   uint32_t references;
+  // Everytime we tick, this goes up. Until it is equal to
+  // `references`, then we actually call the tick function.
+  uint32_t tick_number;
   float static_number; // To avoid allocating memory if it's just a number 
   void* data;
 } input_t;
