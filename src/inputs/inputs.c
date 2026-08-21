@@ -65,10 +65,8 @@ static const input_tick_fn input_kind_to_tick[] = {
   lfo_tick, mixer_tick, no_tick
 };
 
-#define IF_STATIC_DO_NOTHING(i) if (i->kind == INPUT_KIND_STATIC) return
-
 void input_tick(input_t* input) {
-  IF_STATIC_DO_NOTHING(input);
+  if (i->kind == INPUT_KIND_STATIC) return;
   input_kind_to_tick[input->kind](input->data);
 }
 
@@ -79,7 +77,7 @@ float input_get(const input_t* input) {
 
 void input_deinit(input_t* input) {
   input->references--;
-  IF_STATIC_DO_NOTHING(input);
+  if (i->kind == INPUT_KIND_STATIC) return;
   if (input->references == 0) {
     input_kind_to_deinit[input->kind](input->data);
   }
