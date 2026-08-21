@@ -11,7 +11,7 @@ typedef struct {
 } backend_user_data_t;
 
 typedef struct {
-  sample_t* samples;
+  clip_t* clips;
   uint32_t count;
 } backend_data_t;
 

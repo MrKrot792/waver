@@ -262,7 +262,7 @@ int main(int argc, char* argv[]) {
   if (args.tui_mode) {
 #if FEATURE_TUI == 1
     tui_init();
-    tui_loop(NULL, 0);
+    tui_loop((backend_data_t){0});
     tui_deinit();
 #else
     fprintf(stderr, "%s: ERROR: Compiled without FEATURE_TUI.\n", args.exe_name);

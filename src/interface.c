@@ -1,6 +1,5 @@
 #include "config.h"
 #if FEATURE_TUI
-
 #define TB_IMPL
 #if defined(__clang__) && defined(__GNUC__)
 #  pragma GCC diagnostic push
@@ -10,15 +9,16 @@
 #else
 #  include "termbox2.h"
 #endif
+
 #include "interface.h"
+#include "backends/backends.h"
 
 void tui_init() {
   tb_init();
 }
 
-void tui_loop(sample_t* samples, uint32_t sample_count) {
-  (void)samples;
-  (void)sample_count;
+void tui_loop(backend_data_t data) {
+  (void)data;
   
   tb_printf(0, 0, 0, 0, "Hello, world!");
   tb_present();

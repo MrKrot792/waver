@@ -29,12 +29,17 @@ typedef struct {
 float frequency_get(frequency_t f);
 
 typedef struct {
-  frequency_t frequency;
-  float       amplitude;
-  input_t*    instrument;
-  float       start;
-  float       duration;
-} sample_t;
+  float start;
+  float duration;
+} span_t;
+
+// TODO: Reference counting
+typedef struct {
+  input_t*     function;
+  frequency_t* notes;
+  span_t*      durations;
+  uint32_t     count;
+} clip_t;
 
 // Standard ADSR. Nothing to explain.
 typedef struct {
