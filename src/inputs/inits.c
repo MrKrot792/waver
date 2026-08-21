@@ -4,12 +4,11 @@
 #include "inputs/inputs.h"
 
 void input_init_static(input_t* input, float value) {
-  float* p = malloc(sizeof(float));
-  *p = value;
   *input = (input_t){
     .kind = INPUT_KIND_STATIC,
     .references = 1,
-    .data = p,
+    .static_number = value,
+    .data = NULL,
   };
 }
 

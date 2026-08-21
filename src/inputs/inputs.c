@@ -5,10 +5,6 @@
 
 typedef float (*input_fn)(const void* input);
 
-static float static_get(const void* input) {
-  return *(float*)input;
-}
-
 static float lfo_get(const void* input) {
   return oscillator_get((const oscillator_t*)input);
 }
@@ -31,7 +27,7 @@ static float pointer_get(const void* input) {
 }
 
 static const input_fn input_kind_to_fn[] = {
-  static_get, lfo_get, mixer_get, pointer_get
+  lfo_get, mixer_get, pointer_get
 };
 
 typedef void (*input_deinit_fn)(void* data);
@@ -52,7 +48,7 @@ static void mixer_deinit(void* d) {
 }
 
 static const input_deinit_fn input_kind_to_deinit[] = {
-  simple_deinit, lfo_deinit, mixer_deinit, simple_deinit
+  lfo_deinit, mixer_deinit, simple_deinit
 };
 
 typedef void (*input_tick_fn)(void* data);
@@ -72,19 +68,24 @@ static void mixer_tick(void* d) {
 }
 
 static const input_tick_fn input_kind_to_tick[] = {
-  no_tick, lfo_tick, mixer_tick, no_tick
+  lfo_tick, mixer_tick, no_tick
 };
 
+#define IF_STATIC_DO_NOTHING(i) if (i->kind == INPUT_KIND_STATIC) return
+
 void input_tick(input_t* input) {
+  IF_STATIC_DO_NOTHING(input);
   input_kind_to_tick[input->kind](input->data);
 }
 
 float input_get(const input_t* input) {
+  if (input->kind == INPUT_KIND_STATIC) return input->static_number;
   return input_kind_to_fn[input->kind](input->data);
 }
 
 void input_deinit(input_t* input) {
   input->references--;
+  IF_STATIC_DO_NOTHING(input);
   if (input->references == 0) {
     input_kind_to_deinit[input->kind](input->data);
   }
