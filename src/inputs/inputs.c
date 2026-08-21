@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "inputs/inputs.h"
+#include "inputs/inits.h"
 #include "oscillator.h"
 
 typedef float (*input_fn)(const void* input);
@@ -8,13 +9,6 @@ typedef float (*input_fn)(const void* input);
 static float lfo_get(const void* input) {
   return oscillator_get((const oscillator_t*)input);
 }
-
-typedef struct {
-  input_t* i1;
-  input_t* i1_volume;
-  input_t* i2;
-  input_t* i2_volume;
-} input_mixer_t;
 
 static float mixer_get(const void* input) {
   const input_mixer_t* i = input;

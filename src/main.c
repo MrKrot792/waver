@@ -121,14 +121,14 @@ sample_data_t sample_make(sample_data_info_t* info) {
   });
   
   input_t f;
-  input_init_mixer(&f,
-		   &frequency, input_clone(&one),
-		   &dc, input_clone(&one));
+  input_init_mixer(&f, (input_mixer_t){
+    &frequency, input_clone(&one),
+    &dc,        input_clone(&one)
+  });
   
   input_t i;
   input_init_lfo(&i, (oscillator_t){
-    &f,
-    &one,
+    &f, &one,
     (wave_t){
       .function = wave_square,
       .user_data = {0},
@@ -137,7 +137,7 @@ sample_data_t sample_make(sample_data_info_t* info) {
   });
   
   for (size_t n = 0; n < data_size / (info->bits_per_sample / 8); n++) {
-    const float time = (float)n / (float)info->file_frequency;
+    //const float time = (float)n / (float)info->file_frequency;
     timep = 60;
     r.data[n] = 0.5 * input_get(&i);
     input_tick(&i);
