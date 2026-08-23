@@ -40,20 +40,3 @@ typedef struct {
   span_t*      durations;
   uint32_t     count;
 } clip_t;
-
-// Standard ADSR. Nothing to explain.
-typedef struct {
-  float attack;
-  float decay;
-  float sustain;
-  float release;
-} modulation_t;
-
-static const modulation_t modulation_basic = (modulation_t){
-  .attack  = 0.02f,
-  .decay   = 0.1f,
-  .sustain = 0.7f,
-  .release = 0.10f,
-};
-
-float modulate(float time, float sample_length, modulation_t mod);
