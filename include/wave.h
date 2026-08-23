@@ -31,7 +31,7 @@ typedef struct {
 } wave_state_t;
 
 typedef struct {
-  wave_fn function;
+  const wave_fn function;
   wave_user_data_t user_data;
   wave_state_t state;
 } wave_t;
