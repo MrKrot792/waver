@@ -117,7 +117,7 @@ sample_data_t sample_make(sample_data_info_t* info) {
   input_init_lfo(&frequency, (oscillator_t){
     &freq,
     &ampl,
-    (wave_t) {wave_triangle, wave_triangle_user_data(1), {0}},
+    (wave_t) {wave_triangle, wave_triangle_user_data(1)},
   });
   
   input_t f;
@@ -131,8 +131,6 @@ sample_data_t sample_make(sample_data_info_t* info) {
     &f, &one,
     (wave_t){
       .function = wave_square,
-      .user_data = {0},
-      .state = {0},
     },
   });
   
