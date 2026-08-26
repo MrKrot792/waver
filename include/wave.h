@@ -41,6 +41,7 @@ void wave_set_sample_rate(float s);
 
 float wave_get(const wave_t* wave);
 void  wave_tick(wave_t* wave, float frequency);
+void  wave_reset(wave_t* wave);
 void  wave_deinit(wave_t* wave);
 wave_info_t* wave_info_clone(wave_info_t* info);
 

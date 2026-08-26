@@ -23,6 +23,11 @@ void wave_tick(wave_t* wave, float frequency) {
   }
 }
 
+void wave_reset(wave_t* wave) {
+  wave->phase = 0;
+  wave->periods_passed = 0;
+}
+
 void wave_deinit(wave_t* wave) {
   if (wave->info->references == 0) return;
   wave->info->references--;
