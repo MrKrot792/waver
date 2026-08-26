@@ -10,17 +10,17 @@ void wave_set_sample_rate(float s) {
   sample_rate = s;
 }
 
-float wave_get(const wave_t* wave) {
-  float r = wave->function(wave->state.phase, wave->user_data.data);
+float wave_get(wave_t wave, const wave_state_t* state) {
+  float r = wave.function(state->phase, wave.user_data.data);
   return r;
 }
 
-void wave_tick(wave_t* wave, float frequency) {
-  wave->state.phase += frequency / sample_rate;
-  if (wave->state.phase >= 1.0f) {
-    float int_part = floorf(wave->state.phase);
-    wave->state.phase -= int_part;
-    wave->state.periods_passed += int_part;
+void wave_state_tick(wave_state_t* state, float frequency) {
+  state->phase += frequency / sample_rate;
+  if (state->phase >= 1.0f) {
+    float int_part = floorf(state->phase);
+    state->phase -= int_part;
+    state->periods_passed += int_part;
   }
 }
 

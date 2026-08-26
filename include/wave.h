@@ -33,13 +33,12 @@ typedef struct {
 typedef struct {
   const wave_fn function;
   wave_user_data_t user_data;
-  wave_state_t state;
 } wave_t;
 
 void wave_set_sample_rate(float s);
 
-float wave_get(const wave_t* wave);
-void wave_tick(wave_t* wave, float frequency);
+float wave_get(wave_t wave, const wave_state_t* state);
+void wave_state_tick(wave_state_t* state, float frequency);
 
 // TODO: input_t in wave user data
 
