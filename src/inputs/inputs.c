@@ -81,7 +81,7 @@ float input_get(const input_t* input) {
 }
 
 void input_deinit(input_t* input) {
-  assert(input > 0);
+  if (input->references == 0) return;
   input->references--;
   if (input->references == 0) {
     if (input->kind == INPUT_KIND_STATIC) return;
@@ -92,4 +92,52 @@ void input_deinit(input_t* input) {
 input_t* input_clone(input_t* input) {
   input->references++;
   return input;
+}
+
+////////////////////////////////////////////////////////////
+
+typedef void (*state_inner_alloc_fn)(input_inner_t** inner,
+				     input_info_t* info);
+
+void basic_alloc(input_inner_t** inner, input_info_t* info) {
+  *inner = malloc(sizeof(input_state_inner_t));
+  *inner->tick_number = 0;
+}
+
+typedef struct {
+  uint32_t tick_number;
+  oscillator_t osc;
+} input_state_lfo_t;
+
+void lfo_alloc(input_inner_t** inner, input_info_t* i) {
+  input_state_lfo_t* r = malloc(sizeof(input_state_lfo_t));
+  r->tick_number = 0;
+  input_lfo_t* info = (void*)i;
+
+  input_t f, a;
+  input_build(&f, &info->freq, NULL);
+  input_build(&a, &info->ampl, NULL);
+  
+  r->osc = (oscillator_t){
+    .frequency = f,
+    .amplitude = a,
+    .wave = (wave_t){
+      .info = &info->wave,
+    },
+  };
+
+  *inner = (void*)r;
+}
+
+static const state_inner_alloc_fn kind_to_alloc_fn[] = {
+  basic_alloc, basic_alloc, basic_alloc, basic_alloc
+};
+
+void input_state_build(input_state_t* state,
+		       const input_info_t* info,
+		       const input_user_data_t* user_data) {
+  state->info = info;
+  state->time = 0;
+  state->user_data = user_data;
+  kind_to_alloc_fn[info->kind](&state->inner);
 }
