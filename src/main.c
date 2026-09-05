@@ -99,21 +99,42 @@ sample_data_t sample_make(sample_data_info_t* info) {
   // 			  &result_samples_count,
   // 			  (backend_user_data_t){0})
 
+  input_info_static_t fm_ampl;
+  input_init_static(&fm_ampl, 110);
+
   input_info_static_t freq;
-  input_init_static(&freq, 440);
-
-  input_info_static_t ampl;
-  input_init_static(&ampl, 1);
-
+  input_init_static(&freq, 110);
+  
   wave_info_t wave = (wave_info_t){
     wave_sine, {0}, 1,
   };
+
+  input_info_lfo_t fm;
+  input_init_lfo(&fm,
+		 (input_info_t*)&freq,
+		 (input_info_t*)&fm_ampl,
+		 &wave);
+
+  input_info_static_t base_freq;
+  input_init_static(&base_freq, 440);
+  
+  input_info_mixer_t lfo;
+  input_init_mixer(&lfo,
+		   INPUT_MIXER_MODE_ADD,
+		   (input_info_t*)&base_freq,
+		   (input_info_t*)&fm);
+  
+  input_info_static_t ampl;
+  input_init_static(&ampl, 1);
   
   input_info_lfo_t lfo_info;
-  input_init_lfo(&lfo_info, &freq, &ampl, &wave);
+  input_init_lfo(&lfo_info,
+		 (input_info_t*)&lfo,
+		 (input_info_t*)&ampl,
+		 wave_info_clone(&wave));
 
   input_t state;
-  input_build(&state, &lfo_info, NULL);
+  input_build(&state, (input_info_t*)&lfo_info, NULL);
   
   for (size_t n = 0; n < data_size / (info->bits_per_sample / 8); n++) {
     //const float time = (float)n / (float)info->file_frequency;
