@@ -27,7 +27,7 @@ typedef struct {
 } input_mixer_t;
 
 static float mixer_get(const input_t* input) {
-  const input_mixer_t* i = input->inner;
+  const input_mixer_t* i = (const input_mixer_t*)input->inner;
   if (((const input_info_mixer_t*)input->info)->mode == INPUT_MIXER_MODE_ADD)
     return input_get(&i->i1) + input_get(&i->i2);
   else
@@ -44,19 +44,19 @@ static const input_get_fn input_kind_to_fn[] = {
 };
 
 float input_get(const input_t* input) {
-  return input_kind_to_fn[input->info->kind](input->inner);
+  return input_kind_to_fn[input->info->kind](input);
 }
 
 typedef void (*input_tick_fn)(input_t* data);
 
 static void no_tick(input_t* d) { (void)d; }
 static void lfo_tick(input_t* d) {
-  input_lfo_t* o = d;
+  input_lfo_t* o = (input_lfo_t*)(d->inner);
   oscillator_tick(&o->osc);
 }
 
 static void mixer_tick(input_t* d) {
-  input_mixer_t* i = d;
+  input_mixer_t* i = (input_mixer_t*)(d->inner);
   input_tick(&i->i1);
   input_tick(&i->i2);
 }
@@ -82,7 +82,7 @@ static void lfo_deinit(input_t* d) {
 }
 
 static void mixer_deinit(input_t* d) {
-  input_mixer_t* i = d->inner;
+  input_mixer_t* i = (input_mixer_t*)d->inner;
   input_deinit(&i->i1);
   input_deinit(&i->i2);
   free(d->inner);
@@ -111,6 +111,7 @@ typedef void (*state_inner_alloc_fn)(input_inner_t** inner,
 				     const input_info_t* info);
 
 void basic_alloc(input_inner_t** inner, const input_info_t* info) {
+  (void)info;
   *inner = malloc(sizeof(input_inner_t));
   (*inner)->tick_number = 0;
 }
@@ -118,17 +119,17 @@ void basic_alloc(input_inner_t** inner, const input_info_t* info) {
 void lfo_alloc(input_inner_t** inner, const input_info_t* i) {
   input_lfo_t* r = malloc(sizeof(input_lfo_t));
   r->tick_number = 0;
-  input_lfo_t* info = (void*)i;
+  input_info_lfo_t* info = (void*)i;
 
   input_t f, a;
-  input_build(&f, &info->osc.frequency, NULL);
-  input_build(&a, &info->osc.amplitude, NULL);
+  input_build(&f, info->freq, NULL);
+  input_build(&a, info->ampl, NULL);
   
   r->osc = (oscillator_t){
     .frequency = f,
     .amplitude = a,
     .wave = (wave_t){
-      .info = &info->osc.wave,
+      .info = info->wave,
     },
   };
 
@@ -157,8 +158,8 @@ static const state_inner_alloc_fn kind_to_alloc_fn[] = {
 };
 
 void input_build(input_t* state,
-		 const input_info_t* info,
-		 const input_user_data_t* user_data) {
+		 input_info_t* info,
+		 input_user_data_t* user_data) {
   state->info = info;
   state->time = 0;
   state->user_data = user_data;
@@ -174,7 +175,7 @@ void lfo_reset(input_inner_t* inner) {
 }
 
 void mixer_reset(input_inner_t* inner) {
-  input_mixer_t* i = (input_inner_t*)inner;
+  input_mixer_t* i = (input_mixer_t*)inner;
   input_reset(&i->i1, NULL);
   input_reset(&i->i2, NULL);
 }

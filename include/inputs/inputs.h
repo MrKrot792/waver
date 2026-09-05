@@ -36,8 +36,8 @@ typedef struct {
 } input_t;
 
 void input_build(input_t* input,
-		 const input_info_t* info,
-		 const input_user_data_t* user_data);
+		 input_info_t* info,
+		 input_user_data_t* user_data);
 float input_get(const input_t* input);
 void  input_tick(input_t* input);
 float input_get_time(const input_t* input);
