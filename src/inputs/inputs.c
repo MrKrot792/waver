@@ -5,91 +5,190 @@
 #include "inputs/inits.h"
 #include "oscillator.h"
 
-typedef float (*input_fn)(const void* input);
+typedef float (*input_get_fn)(const input_t* input);
 
-static float lfo_get(const void* input) {
-  return oscillator_get((const oscillator_t*)input);
+static float static_get(const input_t* input) {
+  return ((const input_info_static_t*)input->info)->number;
 }
 
-static float mixer_get(const void* input) {
-  const input_mixer_t* i = input;
-  return input_get(i->i1) * input_get(i->i1_volume) +
-         input_get(i->i2) * input_get(i->i2_volume);
+typedef struct {
+  uint32_t tick_number;
+  oscillator_t osc;
+} input_lfo_t;
+
+static float lfo_get(const input_t* input) {
+  return oscillator_get(&((const input_lfo_t*)(input->inner))->osc);
 }
 
-static float pointer_get(const void* input) {
-  return **(float**)input;
+typedef struct {
+  uint32_t tick_number;
+  input_t i1;
+  input_t i2;
+} input_mixer_t;
+
+static float mixer_get(const input_t* input) {
+  const input_mixer_t* i = (const input_mixer_t*)input->inner;
+  if (((const input_info_mixer_t*)input->info)->mode == INPUT_MIXER_MODE_ADD)
+    return input_get(&i->i1) + input_get(&i->i2);
+  else
+    return input_get(&i->i1) * input_get(&i->i2);
 }
 
-static const input_fn input_kind_to_fn[] = {
-  lfo_get, mixer_get, pointer_get
+static float pointer_get(const input_t* input) {
+  return *((const input_info_pointer_t*)input->info)->ptr;
+}
+
+// TODO: Dynamic runtime creation of input kinds 
+static const input_get_fn input_kind_to_fn[] = {
+  static_get, lfo_get, mixer_get, pointer_get
 };
 
-typedef void (*input_deinit_fn)(void* data);
-
-static void simple_deinit(void* d) { free(d); }
-static void lfo_deinit(void* d) {
-  oscillator_deinit((oscillator_t*)d);
-  free(d);
+float input_get(const input_t* input) {
+  return input_kind_to_fn[input->info->kind](input);
 }
 
-static void mixer_deinit(void* d) {
-  input_mixer_t* i = d;
-  input_deinit(i->i1);
-  input_deinit(i->i1_volume);
-  input_deinit(i->i2);
-  input_deinit(i->i2_volume);
-  free(i);
+typedef void (*input_tick_fn)(input_t* data);
+
+static void no_tick(input_t* d) { (void)d; }
+static void lfo_tick(input_t* d) {
+  input_lfo_t* o = (input_lfo_t*)(d->inner);
+  oscillator_tick(&o->osc);
 }
 
-static const input_deinit_fn input_kind_to_deinit[] = {
-  lfo_deinit, mixer_deinit, simple_deinit
-};
-
-typedef void (*input_tick_fn)(void* data);
-
-static void no_tick(void* d) { (void)d; }
-static void lfo_tick(void* d) {
-  oscillator_t* o = d;
-  oscillator_tick(o);
-}
-
-static void mixer_tick(void* d) {
-  input_mixer_t* i = d;
-  input_tick(i->i1);
-  input_tick(i->i1_volume);
-  input_tick(i->i2);
-  input_tick(i->i2_volume);
+static void mixer_tick(input_t* d) {
+  input_mixer_t* i = (input_mixer_t*)(d->inner);
+  input_tick(&i->i1);
+  input_tick(&i->i2);
 }
 
 static const input_tick_fn input_kind_to_tick[] = {
-  lfo_tick, mixer_tick, no_tick
+  no_tick, lfo_tick, mixer_tick, no_tick
 };
 
 void input_tick(input_t* input) {
-  input->tick_number++;
-  if (input->tick_number == input->references) {
-    input->tick_number = 0;
-    if (input->kind == INPUT_KIND_STATIC) return;
-    input_kind_to_tick[input->kind](input->data);
+  input->inner->tick_number++;
+  if (input->inner->tick_number == input->info->references) {
+    input->inner->tick_number = 0;
+    input_kind_to_tick[input->info->kind](input);
   }
 }
 
-float input_get(const input_t* input) {
-  if (input->kind == INPUT_KIND_STATIC) return input->static_number;
-  return input_kind_to_fn[input->kind](input->data);
+typedef void (*input_deinit_fn)(input_t* data);
+
+static void basic_deinit(input_t* d) { free(d->inner); }
+static void lfo_deinit(input_t* d) {
+  oscillator_deinit(&((input_lfo_t*)d->inner)->osc);
+  free(d->inner);
 }
+
+static void mixer_deinit(input_t* d) {
+  input_mixer_t* i = (input_mixer_t*)d->inner;
+  input_deinit(&i->i1);
+  input_deinit(&i->i2);
+  free(d->inner);
+}
+
+static const input_deinit_fn input_kind_to_deinit[] = {
+  basic_deinit, lfo_deinit, mixer_deinit, basic_deinit
+};
 
 void input_deinit(input_t* input) {
-  assert(input > 0);
-  input->references--;
-  if (input->references == 0) {
-    if (input->kind == INPUT_KIND_STATIC) return;
-    input_kind_to_deinit[input->kind](input->data);
+  if (input->info->references == 0) return;
+  input->info->references--;
+  if (input->info->references == 0) {
+    input_kind_to_deinit[input->info->kind](input);
   }
 }
 
-input_t* input_clone(input_t* input) {
+input_info_t* input_info_clone(input_info_t* input) {
   input->references++;
   return input;
+}
+
+////////////////////////////////////////////////////////////
+
+typedef void (*state_inner_alloc_fn)(input_inner_t** inner,
+				     const input_info_t* info);
+
+void basic_alloc(input_inner_t** inner, const input_info_t* info) {
+  (void)info;
+  *inner = malloc(sizeof(input_inner_t));
+  (*inner)->tick_number = 0;
+}
+
+void lfo_alloc(input_inner_t** inner, const input_info_t* i) {
+  input_lfo_t* r = malloc(sizeof(input_lfo_t));
+  r->tick_number = 0;
+  input_info_lfo_t* info = (void*)i;
+
+  input_t f, a;
+  input_build(&f, info->freq, NULL);
+  input_build(&a, info->ampl, NULL);
+  
+  r->osc = (oscillator_t){
+    .frequency = f,
+    .amplitude = a,
+    .wave = (wave_t){
+      .info = info->wave,
+    },
+  };
+
+  *inner = (void*)r;
+}
+
+// TODO: Add user data
+void mixer_alloc(input_inner_t** inner, const input_info_t* i) {
+  input_mixer_t* r = malloc(sizeof(input_mixer_t));
+  r->tick_number = 0;
+  input_info_mixer_t* info = (void*)i;
+
+  input_t i1, i2;
+  
+  input_build(&i1, info->i1, NULL);
+  input_build(&i2, info->i2, NULL);
+
+  r->i1 = i1;
+  r->i2 = i2;
+  
+  *inner = (void*)r;
+}
+
+static const state_inner_alloc_fn kind_to_alloc_fn[] = {
+  basic_alloc, lfo_alloc, mixer_alloc, basic_alloc
+};
+
+void input_build(input_t* state,
+		 input_info_t* info,
+		 input_user_data_t* user_data) {
+  state->info = info;
+  state->time = 0;
+  state->user_data = user_data;
+  kind_to_alloc_fn[info->kind](&state->inner, info);
+}
+
+typedef void (*reset_fn)(input_inner_t* inner);
+
+void no_reset(input_inner_t* inner) { (void)inner; }
+
+void lfo_reset(input_inner_t* inner) {
+  oscillator_reset(&(((input_lfo_t*)inner)->osc));
+}
+
+void mixer_reset(input_inner_t* inner) {
+  input_mixer_t* i = (input_mixer_t*)inner;
+  input_reset(&i->i1, NULL);
+  input_reset(&i->i2, NULL);
+}
+
+static const reset_fn kind_to_reset_fn[] = {
+  no_reset, lfo_reset, mixer_reset, no_reset
+};
+
+void input_reset(input_t* input, input_user_data_t* new_user_data) {
+  if (new_user_data != NULL) {
+    if (input->user_data != NULL) free(input->user_data);
+    input->user_data = new_user_data;
+  }
+  input->time = 0;
+  kind_to_reset_fn[input->info->kind](input->inner);
 }

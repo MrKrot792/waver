@@ -25,21 +25,26 @@ typedef struct {
   void* data;
 } wave_user_data_t;
 
+// TODO: Helper function to initialize the structure.
 typedef struct {
-  float phase;             // From 0 to 1. Loops.
-  uint32_t periods_passed; // Increments each time phase loops.
-} wave_state_t;
+  const wave_fn function;
+  wave_user_data_t user_data;
+  uint32_t references;
+} wave_info_t;
 
 typedef struct {
-  wave_fn function;
-  wave_user_data_t user_data;
-  wave_state_t state;
+  wave_info_t* info;
+  float phase;             // From 0 to 1. Loops.
+  uint32_t periods_passed; // Increments each time phase loops.
 } wave_t;
 
 void wave_set_sample_rate(float s);
 
 float wave_get(const wave_t* wave);
-void wave_tick(wave_t* wave, float frequency);
+void  wave_tick(wave_t* wave, float frequency);
+void  wave_reset(wave_t* wave);
+void  wave_deinit(wave_t* wave);
+wave_info_t* wave_info_clone(wave_info_t* info);
 
 // TODO: input_t in wave user data
 
