@@ -1,7 +1,7 @@
 # What is Waver?
-Waver is a sorta weird TUI (for now only CLi) application. It can
-generate all sorts of weird sounds, but it needs to be recompiled from
-source to change the kind of sound it generates.
+Waver is a sorta weird TUI (for now only CLI) synth. It can generate
+all sorts of weird sounds, since it's a synth, but it needs to be
+recompiled from source to change the kind of sound it generates.
 
 This, of course, will be changed later. But for now...
 
