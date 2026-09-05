@@ -11,7 +11,7 @@ void wave_set_sample_rate(float s) {
 }
 
 float wave_get(const wave_t* wave) {
-  return wave->info->function(wave->phase, wave->info->user_data);
+  return wave->info->function(wave->phase, wave->info->user_data.data);
 }
 
 void wave_tick(wave_t* wave, float frequency) {
@@ -28,12 +28,13 @@ void wave_reset(wave_t* wave) {
   wave->periods_passed = 0;
 }
 
+// TODO: set allocated memory to NULL for everything (input_t wise)
 void wave_deinit(wave_t* wave) {
   if (wave->info->references == 0) return;
   wave->info->references--;
   if (wave->info->references == 0) {
     if (wave->info->user_data.deinit_fn != NULL) {
-      wave->info->user_data.deinit_fn(wave->info->user_data.data):
+      wave->info->user_data.deinit_fn(wave->info->user_data.data);
     }
     
     wave->info->user_data.data = NULL;

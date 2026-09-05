@@ -25,6 +25,7 @@ typedef struct {
   void* data;
 } wave_user_data_t;
 
+// TODO: Helper function to initialize the structure.
 typedef struct {
   const wave_fn function;
   wave_user_data_t user_data;
