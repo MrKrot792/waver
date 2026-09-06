@@ -5,32 +5,10 @@
 #include <unistd.h>
 #include <getopt.h>
 
-#include "config.h"
-#include "interface.h"
 #include "wave.h"
-#include "samples.h"
 
 #include "inputs/inputs.h"
 #include "inputs/inits.h"
-
-#include "backends/static.h"
-
-// float wave(float x) {
-//   float r = 0;
-
-//   for (size_t i = 0; i < result_samples_count; i++) {
-//     if (x < result_samples[i].start) continue;
-//     if (x > result_samples[i].end)   continue;
-//   }
-
-//   return r;
-// }
-
-// float f(size_t i, float time) {
-//   (void)i;
-//   float w = wave(time);
-//   return w;
-// }
 
 #define TAG(s)					\
   (uint32_t)(s[3] << 24 | s[2] << 16 |		\
@@ -184,7 +162,6 @@ void riff_write(const riff_t* riff, FILE* fd) {
 typedef struct {
   const char* exe_name;
   const char* output_file_path;
-  bool tui_mode;
   bool print_usage;
   bool verbose;
 } arguments_t;
@@ -196,24 +173,19 @@ arguments_t parse_arguments(int argc, char* argv[]) {
   static struct option long_options[] = {
     {"help",    0, 0, 'h'},
     {"output",  1, 0, 'o'},
-    {"tui",     0, 0, 't'},
     {"verbose", 0, 0, 'v'},
     {0,         0, 0,  0 }
   };
 
   for (;;) {
     int option_index;
-    int c = getopt_long(argc, argv, "ho:tv",
+    int c = getopt_long(argc, argv, "ho:v",
 			long_options, &option_index);
     if (c == -1) break;
     
     switch (c) {
     case 'h':
       args.print_usage = true;
-      break;
-
-    case 't':
-      args.tui_mode = true;
       break;
 
     case 'o':
@@ -246,7 +218,6 @@ void print_usage(const char* exe_name, int (*print_fn)(const char *format, ...))
   print_fn("OPTIONS:\n");
   print_fn("  -o --output [OUTPUT]  Specify the output file.\n"); 
   print_fn("  -h --help             Prints this help message.\n");
-  print_fn("  -t --tui              Enable TUI mode. Must be compiled with FEATURE_TUI.\n");
   print_fn("  -v --verbose          Enables verbose logging.\n");
 }
 
@@ -258,27 +229,17 @@ int main(int argc, char* argv[]) {
     return 0;
   }
 
-  if (args.tui_mode) {
-#if FEATURE_TUI == 1
-    tui_init();
-    tui_loop((backend_data_t){0});
-    tui_deinit();
-#else
-    fprintf(stderr, "%s: ERROR: Compiled without FEATURE_TUI.\n", args.exe_name);
-#endif
-    
-  } else {
-    printf("Exporting...\n");
-    if (args.verbose) printf("[WAVS] Generating the soundwave...\n");
-    riff_t riff = riff_make(44100);
-    if (args.verbose) printf("[WAVS] Finished!\n");
+  printf("Exporting...\n");
+  if (args.verbose) printf("[WAVS] Generating the soundwave...\n");
+  riff_t riff = riff_make(44100);
+  if (args.verbose) printf("[WAVS] Finished!\n");
 
-    if (args.verbose)
-      printf("[WAVS] Writing the sounds wave to a file %s...\n",
-	     args.output_file_path);
-    FILE* fd = fopen(args.output_file_path, "w");
-    riff_write(&riff, fd);
-    fclose(fd);
-    if (args.verbose) printf("[WAVS] Finished!\n");
-  }
+  if (args.verbose)
+    printf("[WAVS] Writing the sounds wave to a file %s...\n",
+	   args.output_file_path);
+  FILE* fd = fopen(args.output_file_path, "w");
+  riff_write(&riff, fd);
+  fclose(fd);
+  if (args.verbose) printf("[WAVS] Finished!\n");
+  
 }
