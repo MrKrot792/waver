@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include "wave.h"
+#include "alloc.h"
 
 static uint32_t sample_rate = 0;
 
@@ -47,9 +48,9 @@ wave_info_t* wave_info_clone(wave_info_t* info) {
 }
 
 #define WAVE_USER_DATA_FLOAT(p)			\
-  float* d = malloc(sizeof(float));		\
+  float* d = w_malloc(sizeof(float));		\
   *d = p;					\
-  return (wave_user_data_t){ free, d };		\
+  return (wave_user_data_t){ w_free, d };	\
 
 float wave_square(float p, const void* d) {
   float duty = d == NULL ? 0.5 : *(float*)d;

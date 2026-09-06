@@ -6,6 +6,7 @@
 #include <getopt.h>
 
 #include "wave.h"
+#include "alloc.h"
 
 #include "inputs/inputs.h"
 #include "inputs/inits.h"
@@ -69,7 +70,7 @@ sample_data_t sample_make(sample_data_info_t* info) {
     (info->bits_per_sample / 8);
   
   r.size = data_size;
-  r.data = malloc(data_size);
+  r.data = w_malloc(data_size);
   
   wave_set_sample_rate(info->file_frequency);
 
@@ -119,7 +120,7 @@ sample_data_t sample_make(sample_data_info_t* info) {
     r.data[n] = 0.5 * input_get(&state);
     input_tick(&state);
   }
-  
+
   input_deinit(&state);
 
   return r;
@@ -229,17 +230,20 @@ int main(int argc, char* argv[]) {
     return 0;
   }
 
+  w_alloc_init();
+
   printf("Exporting...\n");
-  if (args.verbose) printf("[WAVS] Generating the soundwave...\n");
+  if (args.verbose) printf("[INFO] Generating the soundwave...\n");
   riff_t riff = riff_make(44100);
-  if (args.verbose) printf("[WAVS] Finished!\n");
+  if (args.verbose) printf("[INFO] Finished!\n");
 
   if (args.verbose)
-    printf("[WAVS] Writing the sounds wave to a file %s...\n",
+    printf("[INFO] Writing the sounds wave to a file %s...\n",
 	   args.output_file_path);
   FILE* fd = fopen(args.output_file_path, "w");
   riff_write(&riff, fd);
   fclose(fd);
-  if (args.verbose) printf("[WAVS] Finished!\n");
-  
+  if (args.verbose) printf("[INFO] Finished!\n");
+  w_free(riff.data.data);
+  if (args.verbose) w_alloc_log();
 }

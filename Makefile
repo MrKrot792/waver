@@ -5,7 +5,7 @@ CC        := gcc
 CFLAGS    := -g -O0 -Wall -Wextra -Iinclude -I. -Ithirdparty
 LFLAGS    := -lm
 
-SRCS := src/main.c src/wave.c src/oscillator.c src/inputs/inputs.c src/inputs/inits.c
+SRCS := src/main.c src/wave.c src/oscillator.c src/inputs/inputs.c src/inputs/inits.c src/alloc.c
 OBJS := $(SRCS:src/%.c=build/%.o)
 
 WAV_TARGET := file.wav

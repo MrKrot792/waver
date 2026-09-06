@@ -1,9 +1,9 @@
 #include <stdlib.h>
-#include <assert.h>
 
 #include "inputs/inputs.h"
 #include "inputs/inits.h"
 #include "oscillator.h"
+#include "alloc.h"
 
 typedef float (*input_get_fn)(const input_t* input);
 
@@ -75,17 +75,17 @@ void input_tick(input_t* input) {
 
 typedef void (*input_deinit_fn)(input_t* data);
 
-static void basic_deinit(input_t* d) { free(d->inner); }
+static void basic_deinit(input_t* d) { w_free(d->inner); }
 static void lfo_deinit(input_t* d) {
   oscillator_deinit(&((input_lfo_t*)d->inner)->osc);
-  free(d->inner);
+  w_free(d->inner);
 }
 
 static void mixer_deinit(input_t* d) {
   input_mixer_t* i = (input_mixer_t*)d->inner;
   input_deinit(&i->i1);
   input_deinit(&i->i2);
-  free(d->inner);
+  w_free(d->inner);
 }
 
 static const input_deinit_fn input_kind_to_deinit[] = {
@@ -112,12 +112,12 @@ typedef void (*state_inner_alloc_fn)(input_inner_t** inner,
 
 void basic_alloc(input_inner_t** inner, const input_info_t* info) {
   (void)info;
-  *inner = malloc(sizeof(input_inner_t));
+  *inner = w_malloc(sizeof(input_inner_t));
   (*inner)->tick_number = 0;
 }
 
 void lfo_alloc(input_inner_t** inner, const input_info_t* i) {
-  input_lfo_t* r = malloc(sizeof(input_lfo_t));
+  input_lfo_t* r = w_malloc(sizeof(input_lfo_t));
   r->tick_number = 0;
   input_info_lfo_t* info = (void*)i;
 
@@ -138,7 +138,7 @@ void lfo_alloc(input_inner_t** inner, const input_info_t* i) {
 
 // TODO: Add user data
 void mixer_alloc(input_inner_t** inner, const input_info_t* i) {
-  input_mixer_t* r = malloc(sizeof(input_mixer_t));
+  input_mixer_t* r = w_malloc(sizeof(input_mixer_t));
   r->tick_number = 0;
   input_info_mixer_t* info = (void*)i;
 
@@ -186,7 +186,7 @@ static const reset_fn kind_to_reset_fn[] = {
 
 void input_reset(input_t* input, input_user_data_t* new_user_data) {
   if (new_user_data != NULL) {
-    if (input->user_data != NULL) free(input->user_data);
+    if (input->user_data != NULL) w_free(input->user_data);
     input->user_data = new_user_data;
   }
   input->time = 0;
