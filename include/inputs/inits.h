@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 #include "inputs/inputs.h"
 #include "oscillator.h"
 
